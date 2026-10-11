@@ -1,0 +1,6 @@
+{
+  "name": "本格性格診断 - 性格・行動パターン分析",
+  "description": "全25問の質問と日常行動の分析から、あなたの基本的な性格タイプ、強み・弱み、対人関係の傾向をわかりやすく分析する本格性格診断アプリ。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
