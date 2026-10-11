@@ -28,7 +28,7 @@ export const AllTypesModal: React.FC<AllTypesModalProps> = ({ onClose, onSelectT
         <div className="flex items-center justify-between pb-2 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-bold text-slate-100">全8種類の性格タイプ一覧</h2>
+            <h2 className="text-base font-bold text-slate-100">全20種類の性格タイプ一覧</h2>
           </div>
           <button
             onClick={() => { soundManager.playClick(); onClose(); }}

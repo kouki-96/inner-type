@@ -17,7 +17,8 @@ import {
   Smile,
   Bot,
   Sparkles,
-  X
+  X,
+  Compass
 } from 'lucide-react';
 import { DiagnosisResult } from '../lib/diagnosisLogic';
 import { PERSONALITY_TYPES, PersonalityResult } from '../data/results';
@@ -135,7 +136,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   };
 
   // Share Actions
-  const shareText = `【性格診断結果】私の性格タイプは『${matchedPersonality.name}』でした！\n「${matchedPersonality.tagline}」\n#性格診断 #行動分析`;
+  const shareText = `【性格診断結果】私の性格タイプは『${matchedPersonality.name}』でした！\n「${matchedPersonality.tagline}」\n#本格性格診断 #行動分析`;
   const shareUrl = window.location.href;
 
   const handleShareLINE = () => {
@@ -151,46 +152,60 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Generate "About Me" AI System Prompt Text
-  const aboutAiPromptText = `【私の性格診断データ（AI深層分析用プロンプト）】
-以下の私の性格診断結果とパラメーターをもとに、私の性格特性・適性・キャリア・対人関係・ストレス対策についてさらに深掘りした詳細アドバイスを提供してください。
+  // Generate "About Me" AI System Prompt Text with Full Context
+  const aboutAiPromptText = `【AIへの相談・分析依頼プロンプト】
+以下は、私がWEBの本格性格診断アプリ（全25問の行動質問＋基本プロフィール）を実施して得られた、私の性格・行動パターン・思考傾向に関する詳細な診断データです。
 
-■ 基本情報
-・性格タイプ：${matchedPersonality.name} (${matchedPersonality.categoryTag})
-・キャッチコピー：${matchedPersonality.tagline}
-・星座：${zodiac.signJP}
-・分析日時：${new Date(result.timestamp).toLocaleDateString('ja-JP')}
+あなたには「私の個性を理解したプロのパーソナルキャリアコーチ兼ライフアドバイザー」として、このデータをもとに私の強みの活かし方・適職・人間関係のコツについてアドバイスをしてほしいです。
 
-■ 行動指標・スコア（100点満点）
-・論理的思考力 : ${customStatus.logic}%
-・行動性・推進力 : ${customStatus.action}%
-・協調・共感力   : ${customStatus.empathy}%
-・創造性・独自性 : ${customStatus.creativity}%
-・メンタル安定性 : ${customStatus.stability}%
+==================================================
+■ 私の基本診断データ
+・性格タイプ名：${matchedPersonality.name}
+・タイプ分類　：${matchedPersonality.categoryTag}
+・特徴キャッチ：「${matchedPersonality.tagline}」
+・星座　　　　：${zodiac.signJP}
+・分析実施日時：${new Date(result.timestamp).toLocaleDateString('ja-JP')}
 
-■ 定性分析
-【全体的特徴】
+■ 5つの行動指標スコア（各100点満点）
+・論理的思考力（思考の客観性・分析力） : ${customStatus.logic} %
+・行動性・推進力（実行力・意思決定）   : ${customStatus.action} %
+・協調・共感力   （配慮・チームワーク） : ${customStatus.empathy} %
+・創造性・独自性（発想力・アイデア）   : ${customStatus.creativity} %
+・メンタル・安定性（ストレス耐性・軸） : ${customStatus.stability} %
+
+■ 詳細な定性分析データ
+【1. 全体的特徴】
 ${matchedPersonality.description.overview}
 
-【強み】
+【2. 主な強み】
 ${matchedPersonality.description.strengths}
 
-【注意したいポイント】
+【3. 注意したい弱み・傾向】
 ${matchedPersonality.description.weaknesses}
 
-【人間関係・コミュニケーションの傾向】
+【4. 人間関係・コミュニケーションの傾向】
 ${matchedPersonality.description.relationship}
 
-【アドバイス】
+【5. アナリストからの基本アドバイス】
 ${matchedPersonality.description.advice}
 
-${aiReading ? `■ AI追加アドバイス\n${aiReading}\n` : ''}
---------------------------------------------------
-【AIへの依頼】
-上記の私の診断データを踏まえて、以下の質問にお答えください。
-1. 私の強みを最大限に活かせる仕事・適職や働き方のスタイルは？
-2. 私が仕事や人間関係でストレスを感じたとき、最も効果的な対処法は？
-3. 私がコミュニケーションで良好な人間関係を築くための具体的コツは？`;
+■ 人間関係の相性傾向
+・相性の良いタイプ：${matchedPersonality.affinity.bestPartnerName}（${matchedPersonality.affinity.bestPartnerReason}）
+・すれ違いやすいタイプ：${matchedPersonality.affinity.challengePartnerName}（${matchedPersonality.affinity.challengeReason}）
+${aiReading ? `\n■ AI追加アドバイス\n${aiReading}\n` : ''}
+==================================================
+
+【あなた（AI）へのお願い・質問】
+上記の診断結果とコンテキストを前提として、私に対して以下の3点について具体的にアドバイスしてください。
+
+1. 【適職と成果の出し方】
+私の性格と行動スコアの強みを最も活かせる職種・働き方のスタイル・プロジェクトでの理想的な役割は何ですか？
+
+2. 【人間関係とコミュニケーション】
+「すれ違いやすいタイプ」や苦手な相手と関わる際、私がストレスを溜めずにスムーズにコラボレーションするための具体的なコミュニケーションのコツは何ですか？
+
+3. 【明日からの習慣・アクションプラン】
+私の注意点（弱み）をフォローし、今後さらに個人として成長するために、明日から取り入れられる具体的な行動習慣を3つ教えてください。`;
 
   const handleCopyAboutAiPrompt = () => {
     soundManager.playClick();
@@ -237,17 +252,19 @@ ${matchedPersonality.description.weaknesses}
 【4. 人間関係・コミュニケーションの傾向】
 ${matchedPersonality.description.relationship}
 
-【5. アナリストからのアドバイス】
+【5. アドバイス】
 ${matchedPersonality.description.advice}
 
 --------------------------------------------------
-■ 相性の良いタイプ
+■ 相性の傾向
 --------------------------------------------------
-・ベストパートナー: ${matchedPersonality.affinity.bestPartnerName}
-  (${matchedPersonality.affinity.bestPartnerReason})
+・最高の相性パートナー:
+  ${matchedPersonality.affinity.bestPartnerName}
+  理由: ${matchedPersonality.affinity.bestPartnerReason}
 
-・成長・刺激パートナー: ${matchedPersonality.affinity.challengePartnerName}
-  (${matchedPersonality.affinity.challengeReason})
+・すれ違いやすい注意パートナー:
+  ${matchedPersonality.affinity.challengePartnerName}
+  理由: ${matchedPersonality.affinity.challengeReason}
 ${aiReading ? `\n--------------------------------------------------\n■ AI詳細アドバイスレポート\n--------------------------------------------------\n${aiReading}\n` : ''}
 ==================================================
 本格性格診断 - Personality Diagnosis System
@@ -272,7 +289,6 @@ ${aiReading ? `\n--------------------------------------------------\n■ AI詳�
           <span>もう一度診断する</span>
         </button>
 
-        {/* Replaced "Xで共有" with "私について（AIプロンプト作成）" */}
         <button
           onClick={() => { soundManager.playClick(); setShowAboutAiModal(true); }}
           className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-xs text-white font-bold flex items-center gap-1.5 shadow-md transition-all"
@@ -370,57 +386,67 @@ ${aiReading ? `\n--------------------------------------------------\n■ AI詳�
         </div>
 
         {/* Tab Content */}
-        <div className="p-3.5 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal min-h-[120px] bg-slate-900/50 rounded-xl border border-white/5">
+        <div className="p-4 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal min-h-[140px] bg-slate-900/50 rounded-xl border border-white/5">
           {activeTab === 'overview' && (
-            <div className="space-y-1.5 animate-fade-in">
+            <div className="space-y-2 animate-fade-in">
               <h4 className="font-bold text-indigo-300 text-xs">【全体的特徴】</h4>
-              <p>{matchedPersonality.description.overview}</p>
+              <p className="leading-relaxed">{matchedPersonality.description.overview}</p>
             </div>
           )}
 
           {activeTab === 'strengths' && (
-            <div className="space-y-1.5 animate-fade-in">
+            <div className="space-y-2 animate-fade-in">
               <h4 className="font-bold text-emerald-300 text-xs">【あなたの主な強み】</h4>
-              <p>{matchedPersonality.description.strengths}</p>
+              <p className="leading-relaxed">{matchedPersonality.description.strengths}</p>
             </div>
           )}
 
           {activeTab === 'weaknesses' && (
-            <div className="space-y-1.5 animate-fade-in">
+            <div className="space-y-2 animate-fade-in">
               <h4 className="font-bold text-amber-300 text-xs">【気をつけたい注意点】</h4>
-              <p>{matchedPersonality.description.weaknesses}</p>
+              <p className="leading-relaxed">{matchedPersonality.description.weaknesses}</p>
             </div>
           )}
 
           {activeTab === 'relationship' && (
-            <div className="space-y-1.5 animate-fade-in">
+            <div className="space-y-2 animate-fade-in">
               <h4 className="font-bold text-pink-300 text-xs">【人間関係・仕事での傾向】</h4>
-              <p>{matchedPersonality.description.relationship}</p>
+              <p className="leading-relaxed">{matchedPersonality.description.relationship}</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Best Partner Compatibility */}
+      {/* Best & Incompatible Partner Compatibility Cards */}
       <div className="w-full glass-panel rounded-2xl p-5 space-y-4 border border-white/10">
         <div className="flex items-center justify-between text-xs font-semibold text-indigo-300">
           <span className="flex items-center gap-1">
             <Users className="w-4 h-4 text-indigo-400" />
-            <span>相性の良い性格タイプ</span>
+            <span>相性の良いタイプ & 難易度の高いタイプ</span>
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div className="glass-card p-3 rounded-xl border-emerald-500/30 space-y-1.5">
-            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full">相性抜群</span>
+          {/* Best Partner */}
+          <div className="glass-card p-3.5 rounded-xl border-emerald-500/30 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                相性抜群（ベスト）
+              </span>
+            </div>
             <p className="font-bold text-slate-100 text-sm">{matchedPersonality.affinity.bestPartnerName}</p>
-            <p className="text-[11px] text-slate-300 leading-snug">{matchedPersonality.affinity.bestPartnerReason}</p>
+            <p className="text-[11px] text-slate-300 leading-relaxed">{matchedPersonality.affinity.bestPartnerReason}</p>
           </div>
 
-          <div className="glass-card p-3 rounded-xl border-purple-500/30 space-y-1.5">
-            <span className="text-[10px] font-bold text-purple-300 bg-purple-950/80 px-2 py-0.5 rounded-full">お互いを刺激し合える</span>
+          {/* Incompatible Partner */}
+          <div className="glass-card p-3.5 rounded-xl border-amber-500/30 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                すれ違いやすいタイプ（注意）
+              </span>
+            </div>
             <p className="font-bold text-slate-100 text-sm">{matchedPersonality.affinity.challengePartnerName}</p>
-            <p className="text-[11px] text-slate-300 leading-snug">{matchedPersonality.affinity.challengeReason}</p>
+            <p className="text-[11px] text-slate-300 leading-relaxed">{matchedPersonality.affinity.challengeReason}</p>
           </div>
         </div>
 
@@ -475,7 +501,6 @@ ${aiReading ? `\n--------------------------------------------------\n■ AI詳�
       {/* Share Actions */}
       <div className="w-full space-y-3">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-          {/* Replaced X Share with '私について（AIプロンプト）' */}
           <button
             onClick={() => { soundManager.playClick(); setShowAboutAiModal(true); }}
             className="py-3 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white flex items-center justify-center gap-1.5 font-bold shadow-md transition-all"
@@ -514,11 +539,11 @@ ${aiReading ? `\n--------------------------------------------------\n■ AI詳�
           className="w-full py-3 px-4 rounded-xl glass-card border-slate-800 hover:border-indigo-400 text-xs text-slate-300 flex items-center justify-center gap-2 transition-all"
         >
           <BookOpen className="w-4 h-4 text-indigo-400" />
-          <span>全8種類の性格タイプ一覧を見る</span>
+          <span>全20種類の性格タイプ一覧を見る</span>
         </button>
       </div>
 
-      {/* "ABOUT ME" AI PROMPT MODAL */}
+      {/* "ABOUT ME" AI PROMPT MODAL WITH FULL CONTEXT */}
       {showAboutAiModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="w-full max-w-lg glass-panel rounded-3xl p-6 space-y-4 border border-indigo-500/50 relative max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
@@ -532,19 +557,19 @@ ${aiReading ? `\n--------------------------------------------------\n■ AI詳�
             <div className="space-y-1.5 shrink-0 pr-6">
               <div className="flex items-center gap-2 text-indigo-300">
                 <Bot className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-base font-bold text-white">私について（AI用プロンプト生成）</h3>
+                <h3 className="text-base font-bold text-white">私について（AI深層分析用プロンプト）</h3>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                以下の文章をコピーして ChatGPT や Gemini、Claude などのAIに入力すると、あなた専用のキャリアアドバイスや深層自己分析を受けることができます。
+                以下のコンテキスト付きプロンプトをコピーして ChatGPT、Gemini、Claude などのAIに送ると、AIがあなたの専属コーチとなって適職やアドバイスを返してくれます。
               </p>
             </div>
 
-            {/* Formatted Prompt Code Area */}
+            {/* Formatted Code Block */}
             <div className="flex-1 overflow-y-auto p-3.5 bg-slate-950/90 rounded-2xl border border-slate-800 text-[11px] font-mono text-slate-200 leading-relaxed whitespace-pre-wrap select-all">
               {aboutAiPromptText}
             </div>
 
-            {/* Copy Action Button */}
+            {/* Copy Button */}
             <div className="pt-2 shrink-0 space-y-2">
               <button
                 onClick={handleCopyAboutAiPrompt}
@@ -553,7 +578,7 @@ ${aiReading ? `\n--------------------------------------------------\n■ AI詳�
                 {promptCopied ? (
                   <>
                     <Check className="w-4 h-4 text-emerald-300" />
-                    <span>プロンプトをクリップボードにコピーしました！</span>
+                    <span>コンテキスト付きプロンプトをコピーしました！</span>
                   </>
                 ) : (
                   <>
@@ -563,7 +588,7 @@ ${aiReading ? `\n--------------------------------------------------\n■ AI詳�
                 )}
               </button>
               <p className="text-[10px] text-center text-slate-400">
-                ※ コピー後、ChatGPTなどの入力欄にペーストして送信してください
+                ※ コピー後、AI（ChatGPTなど）の新規チャット画面にペーストして送信してください
               </p>
             </div>
           </div>

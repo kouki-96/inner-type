@@ -98,7 +98,7 @@ export const TopScreen: React.FC<TopScreenProps> = ({
           className="text-xs text-slate-400 hover:text-indigo-300 transition-colors flex items-center gap-1.5 py-1 px-3 rounded-full hover:bg-white/5"
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>全8種類の性格タイプ一覧を見る</span>
+          <span>全20種類の性格タイプ一覧を見る</span>
         </button>
 
         <p className="text-[10px] text-slate-500 font-normal">
