@@ -75,6 +75,10 @@ class SoundManager {
     }
   }
 
+  public playFanfare() {
+    this.playRevealFanfare();
+  }
+
   public playRevealFanfare() {
     if (this.isMuted) return;
     try {

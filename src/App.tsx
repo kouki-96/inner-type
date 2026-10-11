@@ -68,8 +68,9 @@ export default function App() {
 
   // Preview type from AllTypesModal
   const handleSelectTypeDetail = (personality: PersonalityResult) => {
+    const mockProfile: UserProfile = { birthdate: '2000-01-01', dominantHand: 'right', auraColor: 'red' };
     const mockResult: DiagnosisResult = {
-      profile: { birthdate: '2000-01-01', dominantHand: 'right', auraColor: 'red' },
+      profile: mockProfile,
       zodiac: { signJP: '牡羊座', element: '火' },
       traitScores: { leader: 20, analyst: 10, creator: 10, supporter: 10, realist: 10, idealist: 10, individual: 10, harmonizer: 10 },
       traitPercentages: { leader: 20, analyst: 10, creator: 10, supporter: 10, realist: 10, idealist: 10, individual: 10, harmonizer: 10 },
@@ -77,6 +78,13 @@ export default function App() {
       secondaryTrait: personality.secondaryTrait,
       matchedPersonality: personality,
       customStatus: personality.status,
+      aiPromptText: `【本格性格診断・プロファイル分析データ】
+診断された性格タイプ: ${personality.name} (${personality.categoryTag})
+キャッチコピー: 「${personality.tagline}」
+強み: ${personality.description.strengths}
+注意点: ${personality.description.weaknesses}
+人間関係: ${personality.description.relationship}
+AIへのお願い: 上記プロファイルを元にアドバイスと具体的なキャリア・人間関係のアクションプランを提示してください。`,
       timestamp: new Date().toISOString(),
     };
     setDiagnosisResult(mockResult);
@@ -97,9 +105,9 @@ export default function App() {
             onStart={() => setScreen('question')}
             onOpenHistory={() => setIsHistoryOpen(true)}
             onOpenAllTypes={() => setIsAllTypesOpen(true)}
+            hasHistory={history.length > 0}
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
-            historyCount={history.length}
           />
         )}
 
@@ -119,9 +127,8 @@ export default function App() {
         {screen === 'result' && diagnosisResult && (
           <ResultScreen
             result={diagnosisResult}
-            onRetake={() => setScreen('question')}
+            onRestart={() => setScreen('top')}
             onOpenAllTypes={() => setIsAllTypesOpen(true)}
-            onSelectTypeDetail={handleSelectTypeDetail}
           />
         )}
       </main>

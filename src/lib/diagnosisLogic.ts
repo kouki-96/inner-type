@@ -5,7 +5,6 @@ export interface UserProfile {
   birthdate: string;
   dominantHand: string;
   auraColor: string;
-  customColor?: string;
 }
 
 export interface ZodiacInfo {
@@ -22,6 +21,7 @@ export interface DiagnosisResult {
   secondaryTrait: TraitType;
   matchedPersonality: PersonalityResult;
   customStatus: PersonalityStatus;
+  aiPromptText: string;
   timestamp: string;
 }
 
@@ -140,6 +140,51 @@ export function calculateDiagnosis(
   };
 
   const zodiac = getZodiacInfo(profile.birthdate);
+  const colorName = COLOR_OPTIONS.find(c => c.id === profile.auraColor)?.name || '未回答';
+  const handName = DOMINANT_HAND_OPTIONS.find(h => h.id === profile.dominantHand)?.label || '右手';
+
+  // Construct Rich AI Prompt
+  const aiPromptText = `【本格性格診断・プロファイル分析データ】
+あなたは非常に優れた臨床心理学者およびライフコーチです。
+以下の私の診断結果および行動プロファイルデータを元に、私の強み・潜在能力・今後のキャリアや人間関係に関する具体的なアドバイスと分析を行ってください。
+
+■ 基本プロフィール
+・生年月日: ${profile.birthdate || '未設定'} (${zodiac.signJP}・${zodiac.element}属性)
+・利き手: ${handName}
+・直感選択カラー: ${colorName}
+
+■ 診断された性格タイプ
+・タイプ名: ${matchedPersonality.name} (${matchedPersonality.categoryTag})
+・キャッチコピー: 「${matchedPersonality.tagline}」
+・シンボル称号: ${matchedPersonality.avatar.badgeTitle} (${matchedPersonality.symbolEmoji})
+
+■ 行動・心理指標ステータス (100段階評価)
+・論理的思考力: ${customStatus.logic} / 100
+・行動力・推進力: ${customStatus.action} / 100
+・協調性・共感力: ${customStatus.empathy} / 100
+・創造性・独創性: ${customStatus.creativity} / 100
+・精神的安定度: ${customStatus.stability} / 100
+
+■ 性格の基本傾向と詳細データ
+・全体像: ${matchedPersonality.description.overview}
+・主な強み: ${matchedPersonality.description.strengths}
+・注意点・陥りやすい穴: ${matchedPersonality.description.weaknesses}
+・人間関係と対人スタイル: ${matchedPersonality.description.relationship}
+・恋愛・パートナーシップ傾向: ${matchedPersonality.description.loveAndMarriage}
+・仕事・適職スタイル: ${matchedPersonality.description.workStyle}
+・開運アドバイス: ${matchedPersonality.description.advice}
+
+■ 相性分析
+・最も相性の良いタイプ: ${matchedPersonality.affinity.bestPartnerName}
+  理由: ${matchedPersonality.affinity.bestPartnerReason}
+・注意が必要なタイプ: ${matchedPersonality.affinity.challengePartnerName}
+  理由: ${matchedPersonality.affinity.challengeReason}
+
+■ AIへのお願い
+1. 上記データから見える私の隠された才能や、仕事・プライベートでより成果を出すための「具体的な行動指針」を3つ提案してください。
+2. 今後の人生で直面しやすいストレス原因とその乗り越え方をアドバイスしてください。
+3. 私の性格タイプに最適な働き方や、周囲との関係を良くするコミュニケーション術について教えてください。
+4. 最後に、私への質問を1つ投げかけて、さらに深い対話のきっかけを作ってください。`;
 
   return {
     profile,
@@ -150,6 +195,7 @@ export function calculateDiagnosis(
     secondaryTrait,
     matchedPersonality,
     customStatus,
+    aiPromptText,
     timestamp: new Date().toISOString(),
   };
 }
