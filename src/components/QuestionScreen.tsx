@@ -291,8 +291,8 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
               {currentQ.question}
             </h3>
 
-            {/* 4 Choices */}
-            <div className="space-y-2.5 pt-1">
+            {/* 5 Choices */}
+            <div className="space-y-2 pt-1">
               {currentQ.choices.map((choice) => {
                 const isSelected = answers[currentQ.id] === choice.id;
                 return (
@@ -301,10 +301,10 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                     type="button"
                     disabled={isTransitioning}
                     onClick={() => handleSelectChoice(currentQ.id, choice.id)}
-                    className={`w-full p-3.5 sm:p-4 rounded-2xl text-left text-xs sm:text-sm transition-all duration-200 flex items-center justify-between group min-h-[50px] ${
+                    className={`w-full p-3 sm:p-3.5 rounded-2xl text-left text-xs sm:text-sm transition-all duration-200 flex items-center justify-between group min-h-[46px] ${
                       isSelected
-                        ? 'bg-indigo-900/70 border-indigo-400 text-white font-semibold shadow-lg'
-                        : 'glass-card border-slate-800 text-slate-200 hover:border-indigo-400/50 hover:bg-slate-800/80'
+                        ? 'bg-indigo-900/80 border-indigo-400 text-white font-semibold shadow-lg'
+                        : 'glass-card border-slate-800/80 text-slate-200 hover:border-indigo-400/50 hover:bg-slate-800/80'
                     }`}
                   >
                     <span className="leading-relaxed pr-2">{choice.text}</span>
