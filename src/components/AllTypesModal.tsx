@@ -23,12 +23,12 @@ export const AllTypesModal: React.FC<AllTypesModalProps> = ({ onClose, onSelectT
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
-      <div className="w-full max-w-2xl max-h-[90vh] glass-panel rounded-3xl p-5 sm:p-7 space-y-5 border border-indigo-500/40 relative flex flex-col overflow-hidden shadow-2xl">
+      <div className="w-full max-w-2xl max-h-[90vh] glass-panel rounded-3xl p-4 sm:p-7 space-y-4 sm:space-y-5 border border-indigo-500/40 relative flex flex-col overflow-hidden shadow-2xl">
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-2 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-bold text-slate-100">全24種類の性格タイプ一覧</h2>
+            <BookOpen className="w-5 h-5 text-indigo-400 shrink-0" />
+            <h2 className="text-sm sm:text-base font-bold text-slate-100">全24種類の性格タイプ一覧</h2>
           </div>
           <button
             onClick={() => { soundManager.playClick(); onClose(); }}
@@ -46,31 +46,31 @@ export const AllTypesModal: React.FC<AllTypesModalProps> = ({ onClose, onSelectT
             placeholder="キーワードで性格タイプを検索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-400"
+            className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-400 min-h-[40px]"
           />
         </div>
 
         {/* Types Grid */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
             {filteredTypes.map(type => (
               <div
                 key={type.id}
                 onClick={() => { soundManager.playClick(); setSelectedTypeDetail(type); }}
-                className="glass-card p-3.5 rounded-2xl cursor-pointer hover:border-indigo-400/50 hover:scale-[1.01] transition-all flex items-center justify-between group"
+                className="glass-card p-3 sm:p-3.5 rounded-2xl cursor-pointer hover:border-indigo-400/50 hover:scale-[1.01] transition-all flex items-center justify-between group min-h-[64px]"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${type.avatar.avatarBg} flex items-center justify-center text-xl shrink-0 shadow-md`}>
+                  <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${type.avatar.avatarBg} flex items-center justify-center text-xl shrink-0 shadow-md border border-white/20`}>
                     {type.avatar.avatarIcon}
                   </div>
                   <div className="space-y-0.5">
                     <span className="text-[10px] text-indigo-300 font-semibold">
                       {type.categoryTag}
                     </span>
-                    <h4 className="font-bold text-sm text-slate-100 group-hover:text-indigo-300 transition-colors">
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-100 group-hover:text-indigo-300 transition-colors">
                       {type.name}
                     </h4>
-                    <p className="text-[11px] text-slate-400 line-clamp-1">{type.tagline}</p>
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 line-clamp-1">{type.tagline}</p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all shrink-0" />
@@ -81,11 +81,11 @@ export const AllTypesModal: React.FC<AllTypesModalProps> = ({ onClose, onSelectT
 
         {/* Detail Sub-modal */}
         {selectedTypeDetail && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-lg z-60 flex items-center justify-center p-4">
-            <div className="w-full max-w-lg glass-panel rounded-3xl p-6 space-y-4 border border-indigo-500/50 relative max-h-[85vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-lg z-60 flex items-center justify-center p-3 sm:p-4">
+            <div className="w-full max-w-lg glass-panel rounded-3xl p-5 sm:p-6 space-y-4 border border-indigo-500/50 relative max-h-[85vh] overflow-y-auto">
               <button
                 onClick={() => setSelectedTypeDetail(null)}
-                className="absolute top-4 right-4 p-1 rounded-full bg-slate-900 text-slate-400 hover:text-white"
+                className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-900 text-slate-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -95,7 +95,7 @@ export const AllTypesModal: React.FC<AllTypesModalProps> = ({ onClose, onSelectT
                   {selectedTypeDetail.avatar.avatarIcon}
                 </div>
                 <span className="text-xs text-indigo-300 font-bold">{selectedTypeDetail.categoryTag}</span>
-                <h3 className="text-xl font-bold text-white">{selectedTypeDetail.name}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white">{selectedTypeDetail.name}</h3>
                 <p className="text-xs text-slate-300">「{selectedTypeDetail.tagline}」</p>
               </div>
 
@@ -129,7 +129,7 @@ export const AllTypesModal: React.FC<AllTypesModalProps> = ({ onClose, onSelectT
                   setSelectedTypeDetail(null);
                   onClose();
                 }}
-                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1"
+                className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1 min-h-[44px]"
               >
                 <span>このタイプを詳細画面で見る</span>
               </button>
