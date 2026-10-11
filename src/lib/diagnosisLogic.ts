@@ -48,6 +48,57 @@ export function getZodiacInfo(birthdateStr: string): ZodiacInfo {
   return { signJP: '魚座', element: '水' };
 }
 
+// 8-Dimensional Personality Type Vectors
+const TYPE_VECTORS: Record<string, Record<TraitType, number>> = {
+  passion_leader: { leader: 10, idealist: 8, creator: 6, realist: 4, analyst: 3, individual: 3, supporter: 3, harmonizer: 2 },
+  logical_analyst: { analyst: 10, realist: 8, individual: 6, leader: 4, creator: 4, supporter: 2, idealist: 2, harmonizer: 2 },
+  gentle_harmonizer: { harmonizer: 10, supporter: 8, realist: 5, idealist: 4, creator: 3, analyst: 3, individual: 2, leader: 2 },
+  free_creator: { creator: 10, individual: 8, idealist: 7, leader: 5, harmonizer: 4, analyst: 3, supporter: 2, realist: 2 },
+  cautious_realist: { realist: 10, analyst: 8, supporter: 5, individual: 4, harmonizer: 3, leader: 2, creator: 1, idealist: 1 },
+  sincere_supporter: { supporter: 10, harmonizer: 8, realist: 6, idealist: 4, analyst: 3, creator: 3, individual: 2, leader: 2 },
+  my_way_individual: { individual: 10, analyst: 8, creator: 7, realist: 5, idealist: 3, leader: 2, supporter: 2, harmonizer: 1 },
+  idealist_visionary: { idealist: 10, leader: 8, creator: 7, harmonizer: 4, analyst: 3, supporter: 3, realist: 2, individual: 2 },
+  tactical_strategist: { analyst: 10, leader: 8, realist: 7, individual: 5, creator: 4, idealist: 3, supporter: 2, harmonizer: 1 },
+  empathic_counselor: { supporter: 10, individual: 8, harmonizer: 7, creator: 6, idealist: 4, analyst: 3, realist: 2, leader: 1 },
+  energetic_pioneer: { leader: 10, creator: 8, idealist: 7, individual: 5, realist: 3, analyst: 3, harmonizer: 2, supporter: 1 },
+  steady_organizer: { realist: 10, supporter: 8, harmonizer: 6, analyst: 5, leader: 4, individual: 3, idealist: 2, creator: 1 },
+  flexible_coordinator: { harmonizer: 10, analyst: 8, supporter: 6, realist: 5, creator: 4, idealist: 3, individual: 2, leader: 2 },
+  curious_explorer: { idealist: 10, creator: 8, analyst: 6, leader: 5, individual: 4, harmonizer: 3, supporter: 2, realist: 2 },
+  quiet_perfectionist: { individual: 10, realist: 8, analyst: 7, creator: 6, leader: 3, idealist: 2, supporter: 2, harmonizer: 1 },
+  inspiring_promoter: { leader: 10, harmonizer: 8, creator: 7, idealist: 6, supporter: 5, analyst: 3, realist: 2, individual: 1 },
+  balanced_mediator: { analyst: 10, harmonizer: 8, realist: 6, supporter: 5, individual: 4, idealist: 3, leader: 2, creator: 2 },
+  resilient_striver: { realist: 10, idealist: 8, leader: 7, analyst: 5, individual: 4, supporter: 3, harmonizer: 2, creator: 1 },
+  intuitive_innovator: { creator: 10, leader: 8, idealist: 7, individual: 6, analyst: 4, harmonizer: 2, supporter: 2, realist: 1 },
+  calm_observer: { individual: 10, supporter: 8, analyst: 7, realist: 6, harmonizer: 5, creator: 3, idealist: 2, leader: 1 },
+  charismatic_conductor: { leader: 10, supporter: 8, harmonizer: 7, idealist: 5, analyst: 4, realist: 3, creator: 2, individual: 1 },
+  dedicated_guardian: { realist: 10, harmonizer: 8, supporter: 7, analyst: 5, individual: 3, leader: 3, idealist: 2, creator: 1 },
+  expressive_artist: { creator: 10, supporter: 8, harmonizer: 7, idealist: 6, individual: 5, analyst: 3, realist: 2, leader: 1 },
+  wise_thinker: { analyst: 10, individual: 8, realist: 7, creator: 5, idealist: 4, leader: 3, supporter: 2, harmonizer: 1 },
+};
+
+// Calculate cosine similarity between two trait vectors
+function calculateCosineSimilarity(
+  vecA: Record<TraitType, number>,
+  vecB: Record<TraitType, number>
+): number {
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+
+  const traits: TraitType[] = ['leader', 'analyst', 'creator', 'supporter', 'realist', 'idealist', 'individual', 'harmonizer'];
+
+  traits.forEach(trait => {
+    const a = vecA[trait] || 0;
+    const b = vecB[trait] || 0;
+    dotProduct += a * b;
+    normA += a * a;
+    normB += b * b;
+  });
+
+  if (normA === 0 || normB === 0) return 0;
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
 export function calculateDiagnosis(
   profile: UserProfile,
   answers: Record<number, string>
@@ -63,24 +114,45 @@ export function calculateDiagnosis(
     harmonizer: 0,
   };
 
-  // 1. Dominant Hand Bonus
+  const zodiac = getZodiacInfo(profile.birthdate);
+  let anxiousChoiceCount = 0;
+
+  // 1. Dominant Hand Synergy
   const handOpt = DOMINANT_HAND_OPTIONS.find(h => h.id === profile.dominantHand);
   if (handOpt) {
     Object.entries(handOpt.bonus).forEach(([trait, bonus]) => {
-      traitScores[trait as TraitType] += bonus * 2;
+      traitScores[trait as TraitType] += bonus * 1.5;
     });
   }
 
-  // 2. Color Choice Bonus
+  // 2. Color Choice Synergy
   const colorOpt = COLOR_OPTIONS.find(c => c.id === profile.auraColor);
   if (colorOpt && colorOpt.id !== 'none') {
-    traitScores[colorOpt.trait] += 3;
+    traitScores[colorOpt.trait] += 2.5;
   }
 
-  // 3. Process 25 Questions
+  // 3. Zodiac Element Synergy
+  if (zodiac.element === '火') {
+    traitScores.leader += 1.5;
+    traitScores.idealist += 1.5;
+  } else if (zodiac.element === '地') {
+    traitScores.realist += 1.5;
+    traitScores.analyst += 1.5;
+  } else if (zodiac.element === '風') {
+    traitScores.analyst += 1.5;
+    traitScores.harmonizer += 1.5;
+  } else if (zodiac.element === '水') {
+    traitScores.supporter += 1.5;
+    traitScores.creator += 1.5;
+  }
+
+  // 4. Process 25 Questions
   QUESTIONS.forEach(q => {
     const selectedChoiceId = answers[q.id];
     if (selectedChoiceId) {
+      if (selectedChoiceId === 'e') {
+        anxiousChoiceCount++;
+      }
       const choice = q.choices.find(c => c.id === selectedChoiceId);
       if (choice) {
         Object.entries(choice.traits).forEach(([trait, score]) => {
@@ -105,7 +177,7 @@ export function calculateDiagnosis(
     harmonizer: Math.round((traitScores.harmonizer / totalScore) * 100),
   };
 
-  // Sort traits
+  // Sort traits by user score
   const sortedTraits = (Object.keys(traitScores) as TraitType[]).sort(
     (a, b) => traitScores[b] - traitScores[a]
   );
@@ -116,30 +188,72 @@ export function calculateDiagnosis(
     secondaryTrait = sortedTraits[2] || 'realist';
   }
 
-  // Match Personality from PERSONALITY_TYPES
+  // High Precision Vector Distance + Trait Synergy Matching
   const allTypes = Object.values(PERSONALITY_TYPES);
-  let matchedPersonality = allTypes.find(
-    p => p.primaryTrait === primaryTrait && p.secondaryTrait === secondaryTrait
-  );
+  let bestMatch: PersonalityResult = allTypes[0];
+  let highestSimilarity = -1;
 
-  if (!matchedPersonality) {
-    matchedPersonality = allTypes.find(p => p.primaryTrait === primaryTrait);
-  }
+  allTypes.forEach(p => {
+    const targetVector = TYPE_VECTORS[p.id] || {
+      leader: p.primaryTrait === 'leader' ? 10 : 2,
+      analyst: p.primaryTrait === 'analyst' ? 10 : 2,
+      creator: p.primaryTrait === 'creator' ? 10 : 2,
+      supporter: p.primaryTrait === 'supporter' ? 10 : 2,
+      realist: p.primaryTrait === 'realist' ? 10 : 2,
+      idealist: p.primaryTrait === 'idealist' ? 10 : 2,
+      individual: p.primaryTrait === 'individual' ? 10 : 2,
+      harmonizer: p.primaryTrait === 'harmonizer' ? 10 : 2,
+    };
 
-  if (!matchedPersonality) {
-    matchedPersonality = allTypes[0];
-  }
+    let sim = calculateCosineSimilarity(traitScores, targetVector);
 
-  // Calculate Status Parameters
+    // Exact Primary Trait Match Bonus
+    if (p.primaryTrait === primaryTrait) {
+      sim += 0.12;
+    }
+    // Exact Secondary Trait Match Bonus
+    if (p.secondaryTrait === secondaryTrait) {
+      sim += 0.08;
+    }
+    // Reverse Trait Match Bonus
+    if (p.primaryTrait === secondaryTrait && p.secondaryTrait === primaryTrait) {
+      sim += 0.04;
+    }
+
+    // Astrological Element Alignment
+    if (zodiac.element === '火' && (p.primaryTrait === 'leader' || p.primaryTrait === 'idealist' || p.primaryTrait === 'creator')) {
+      sim += 0.02;
+    } else if (zodiac.element === '地' && (p.primaryTrait === 'realist' || p.primaryTrait === 'analyst' || p.primaryTrait === 'supporter')) {
+      sim += 0.02;
+    } else if (zodiac.element === '風' && (p.primaryTrait === 'analyst' || p.primaryTrait === 'harmonizer' || p.primaryTrait === 'individual')) {
+      sim += 0.02;
+    } else if (zodiac.element === '水' && (p.primaryTrait === 'supporter' || p.primaryTrait === 'harmonizer' || p.primaryTrait === 'creator')) {
+      sim += 0.02;
+    }
+
+    if (sim > highestSimilarity) {
+      highestSimilarity = sim;
+      bestMatch = p;
+    }
+  });
+
+  const matchedPersonality = bestMatch;
+
+  // Fully dynamic calculation across full 15-99 range without artificial floors
+  const rawLogic = (traitPercentages.analyst * 2.2 + traitPercentages.realist * 1.5 + traitPercentages.individual * 0.5);
+  const rawAction = (traitPercentages.leader * 2.5 + traitPercentages.idealist * 1.8 + traitPercentages.creator * 1.2) - (anxiousChoiceCount * 1.2);
+  const rawEmpathy = (traitPercentages.harmonizer * 2.4 + traitPercentages.supporter * 2.0);
+  const rawCreativity = (traitPercentages.creator * 2.5 + traitPercentages.individual * 1.8 + traitPercentages.idealist * 1.2);
+  const rawStability = (traitPercentages.realist * 2.0 + traitPercentages.harmonizer * 1.2 + traitPercentages.analyst * 1.0) - (anxiousChoiceCount * 2.5);
+
   const customStatus: PersonalityStatus = {
-    logic: Math.min(99, Math.max(50, Math.round(matchedPersonality.status.logic + (traitScores.analyst + traitScores.realist) * 0.3 - 5))),
-    action: Math.min(99, Math.max(50, Math.round(matchedPersonality.status.action + (traitScores.leader + traitScores.idealist) * 0.3 - 5))),
-    empathy: Math.min(99, Math.max(50, Math.round(matchedPersonality.status.empathy + (traitScores.harmonizer + traitScores.supporter) * 0.3 - 5))),
-    creativity: Math.min(99, Math.max(50, Math.round(matchedPersonality.status.creativity + (traitScores.creator + traitScores.individual) * 0.3 - 5))),
-    stability: Math.min(99, Math.max(50, Math.round(matchedPersonality.status.stability + (traitScores.realist + traitScores.analyst) * 0.3 - 5))),
+    logic: Math.min(99, Math.max(15, Math.round(20 + rawLogic * 1.1))),
+    action: Math.min(99, Math.max(15, Math.round(20 + rawAction * 1.1))),
+    empathy: Math.min(99, Math.max(15, Math.round(20 + rawEmpathy * 1.1))),
+    creativity: Math.min(99, Math.max(15, Math.round(20 + rawCreativity * 1.1))),
+    stability: Math.min(99, Math.max(15, Math.round(45 + rawStability * 0.9))),
   };
 
-  const zodiac = getZodiacInfo(profile.birthdate);
   const colorName = COLOR_OPTIONS.find(c => c.id === profile.auraColor)?.name || '未回答';
   const handName = DOMINANT_HAND_OPTIONS.find(h => h.id === profile.dominantHand)?.label || '右手';
 
