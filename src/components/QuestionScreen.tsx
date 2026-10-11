@@ -59,31 +59,41 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   // Questions state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
   const zodiac = getZodiacInfo(profile.birthdate);
 
   const handleStartQuestions = () => {
     soundManager.playClick();
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+    setIsTransitioning(false);
     setPhase('questions');
   };
 
   const handleSelectChoice = (questionId: number, choiceId: string) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     soundManager.playClick();
+
     const updatedAnswers = { ...answers, [questionId]: choiceId };
     setAnswers(updatedAnswers);
 
     if (currentQuestionIndex < QUESTIONS.length - 1) {
       setTimeout(() => {
         setCurrentQuestionIndex(prev => prev + 1);
+        setIsTransitioning(false);
       }, 150);
     } else {
       setTimeout(() => {
         onComplete(profile, updatedAnswers);
+        setIsTransitioning(false);
       }, 200);
     }
   };
 
   const handlePrevQuestion = () => {
+    if (isTransitioning) return;
     soundManager.playClick();
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
@@ -276,7 +286,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
           </div>
 
           {/* Question Box */}
-          <div className="glass-panel rounded-3xl p-5 sm:p-7 my-auto space-y-5 border border-white/10 shadow-2xl relative overflow-hidden">
+          <div key={currentQ.id} className="glass-panel rounded-3xl p-5 sm:p-7 my-auto space-y-5 border border-white/10 shadow-2xl relative overflow-hidden animate-fade-in">
             <h3 className="text-base sm:text-lg font-bold text-slate-100 leading-relaxed">
               {currentQ.question}
             </h3>
@@ -287,7 +297,9 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                 const isSelected = answers[currentQ.id] === choice.id;
                 return (
                   <button
-                    key={choice.id}
+                    key={`${currentQ.id}-${choice.id}`}
+                    type="button"
+                    disabled={isTransitioning}
                     onClick={() => handleSelectChoice(currentQ.id, choice.id)}
                     className={`w-full p-3.5 sm:p-4 rounded-2xl text-left text-xs sm:text-sm transition-all duration-200 flex items-center justify-between group min-h-[50px] ${
                       isSelected
