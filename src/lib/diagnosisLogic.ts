@@ -48,13 +48,13 @@ export function getZodiacInfo(birthdateStr: string): ZodiacInfo {
   return { signJP: '魚座', element: '水' };
 }
 
-// 8-Dimensional Personality Type Vectors
+// 8-Dimensional Personality Type Reference Vectors for Vector Cosine Similarity
 const TYPE_VECTORS: Record<string, Record<TraitType, number>> = {
-  passion_leader: { leader: 10, idealist: 8, creator: 6, realist: 4, analyst: 3, individual: 3, supporter: 3, harmonizer: 2 },
-  logical_analyst: { analyst: 10, realist: 8, individual: 6, leader: 4, creator: 4, supporter: 2, idealist: 2, harmonizer: 2 },
+  passion_leader: { leader: 10, idealist: 8, creator: 5, realist: 4, analyst: 3, individual: 3, supporter: 3, harmonizer: 2 },
+  logical_analyst: { analyst: 10, realist: 8, individual: 6, leader: 4, creator: 3, supporter: 3, idealist: 2, harmonizer: 2 },
   gentle_harmonizer: { harmonizer: 10, supporter: 8, realist: 5, idealist: 4, creator: 3, analyst: 3, individual: 2, leader: 2 },
   free_creator: { creator: 10, individual: 8, idealist: 7, leader: 5, harmonizer: 4, analyst: 3, supporter: 2, realist: 2 },
-  cautious_realist: { realist: 10, analyst: 8, supporter: 5, individual: 4, harmonizer: 3, leader: 2, creator: 1, idealist: 1 },
+  cautious_realist: { realist: 10, analyst: 8, supporter: 6, individual: 4, harmonizer: 4, leader: 2, creator: 2, idealist: 1 },
   sincere_supporter: { supporter: 10, harmonizer: 8, realist: 6, idealist: 4, analyst: 3, creator: 3, individual: 2, leader: 2 },
   my_way_individual: { individual: 10, analyst: 8, creator: 7, realist: 5, idealist: 3, leader: 2, supporter: 2, harmonizer: 1 },
   idealist_visionary: { idealist: 10, leader: 8, creator: 7, harmonizer: 4, analyst: 3, supporter: 3, realist: 2, individual: 2 },
@@ -117,32 +117,36 @@ export function calculateDiagnosis(
   const zodiac = getZodiacInfo(profile.birthdate);
   let anxiousChoiceCount = 0;
 
-  // 1. Dominant Hand Synergy
+  // 1. Dominant Hand Synergy (+2.0 direct bonus)
   const handOpt = DOMINANT_HAND_OPTIONS.find(h => h.id === profile.dominantHand);
   if (handOpt) {
     Object.entries(handOpt.bonus).forEach(([trait, bonus]) => {
-      traitScores[trait as TraitType] += bonus * 1.5;
+      traitScores[trait as TraitType] += bonus * 2.0;
     });
   }
 
-  // 2. Color Choice Synergy
+  // 2. Color Choice Synergy (+3.0 direct bonus)
   const colorOpt = COLOR_OPTIONS.find(c => c.id === profile.auraColor);
   if (colorOpt && colorOpt.id !== 'none') {
-    traitScores[colorOpt.trait] += 2.5;
+    traitScores[colorOpt.trait] += 3.0;
   }
 
-  // 3. Zodiac Element Synergy
+  // 3. Zodiac Element Synergy (+2.5 direct bonus to core traits)
   if (zodiac.element === '火') {
-    traitScores.leader += 1.5;
-    traitScores.idealist += 1.5;
+    traitScores.leader += 2.5;
+    traitScores.idealist += 2.5;
+    traitScores.creator += 1.5;
   } else if (zodiac.element === '地') {
-    traitScores.realist += 1.5;
-    traitScores.analyst += 1.5;
-  } else if (zodiac.element === '風') {
-    traitScores.analyst += 1.5;
-    traitScores.harmonizer += 1.5;
-  } else if (zodiac.element === '水') {
+    traitScores.realist += 2.5;
+    traitScores.analyst += 2.5;
     traitScores.supporter += 1.5;
+  } else if (zodiac.element === '風') {
+    traitScores.analyst += 2.5;
+    traitScores.harmonizer += 2.5;
+    traitScores.individual += 1.5;
+  } else if (zodiac.element === '水') {
+    traitScores.supporter += 2.5;
+    traitScores.harmonizer += 2.5;
     traitScores.creator += 1.5;
   }
 
@@ -155,9 +159,10 @@ export function calculateDiagnosis(
       }
       const choice = q.choices.find(c => c.id === selectedChoiceId);
       if (choice) {
+        const weight = selectedChoiceId === 'e' ? 1.2 : 2.5;
         Object.entries(choice.traits).forEach(([trait, score]) => {
           if (score) {
-            traitScores[trait as TraitType] += score * 3;
+            traitScores[trait as TraitType] += score * weight;
           }
         });
       }
@@ -188,10 +193,10 @@ export function calculateDiagnosis(
     secondaryTrait = sortedTraits[2] || 'realist';
   }
 
-  // High Precision Vector Distance + Trait Synergy Matching
+  // Multi-Factor Precision Matching Engine
   const allTypes = Object.values(PERSONALITY_TYPES);
   let bestMatch: PersonalityResult = allTypes[0];
-  let highestSimilarity = -1;
+  let highestMatchScore = -999;
 
   allTypes.forEach(p => {
     const targetVector = TYPE_VECTORS[p.id] || {
@@ -207,51 +212,54 @@ export function calculateDiagnosis(
 
     let sim = calculateCosineSimilarity(traitScores, targetVector);
 
-    // Exact Primary Trait Match Bonus
-    if (p.primaryTrait === primaryTrait) {
-      sim += 0.12;
-    }
-    // Exact Secondary Trait Match Bonus
-    if (p.secondaryTrait === secondaryTrait) {
-      sim += 0.08;
-    }
-    // Reverse Trait Match Bonus
-    if (p.primaryTrait === secondaryTrait && p.secondaryTrait === primaryTrait) {
-      sim += 0.04;
+    // Exact Primary & Secondary Trait Hierarchy Bonuses
+    if (p.primaryTrait === primaryTrait && p.secondaryTrait === secondaryTrait) {
+      sim += 0.35; // Perfect Pair Match
+    } else {
+      if (p.primaryTrait === primaryTrait) sim += 0.20;
+      if (p.secondaryTrait === secondaryTrait) sim += 0.15;
+      if (p.primaryTrait === secondaryTrait && p.secondaryTrait === primaryTrait) sim += 0.10;
+      if (p.primaryTrait === sortedTraits[2] || p.secondaryTrait === sortedTraits[2]) sim += 0.05;
     }
 
     // Astrological Element Alignment
     if (zodiac.element === '火' && (p.primaryTrait === 'leader' || p.primaryTrait === 'idealist' || p.primaryTrait === 'creator')) {
-      sim += 0.02;
+      sim += 0.06;
     } else if (zodiac.element === '地' && (p.primaryTrait === 'realist' || p.primaryTrait === 'analyst' || p.primaryTrait === 'supporter')) {
-      sim += 0.02;
+      sim += 0.06;
     } else if (zodiac.element === '風' && (p.primaryTrait === 'analyst' || p.primaryTrait === 'harmonizer' || p.primaryTrait === 'individual')) {
-      sim += 0.02;
+      sim += 0.06;
     } else if (zodiac.element === '水' && (p.primaryTrait === 'supporter' || p.primaryTrait === 'harmonizer' || p.primaryTrait === 'creator')) {
-      sim += 0.02;
+      sim += 0.06;
     }
 
-    if (sim > highestSimilarity) {
-      highestSimilarity = sim;
+    // Color Choice Synergy Bonus
+    if (colorOpt && (colorOpt.trait === p.primaryTrait || colorOpt.trait === p.secondaryTrait)) {
+      sim += 0.04;
+    }
+
+    // Anxious / Cautious Choice Balance Factor
+    if (anxiousChoiceCount >= 5 && (p.primaryTrait === 'realist' || p.primaryTrait === 'analyst' || p.secondaryTrait === 'realist' || p.secondaryTrait === 'harmonizer')) {
+      sim += 0.03;
+    }
+
+    if (sim > highestMatchScore) {
+      highestMatchScore = sim;
       bestMatch = p;
     }
   });
 
   const matchedPersonality = bestMatch;
 
-  // Fully dynamic calculation across full 15-99 range without artificial floors
-  const rawLogic = (traitPercentages.analyst * 2.2 + traitPercentages.realist * 1.5 + traitPercentages.individual * 0.5);
-  const rawAction = (traitPercentages.leader * 2.5 + traitPercentages.idealist * 1.8 + traitPercentages.creator * 1.2) - (anxiousChoiceCount * 1.2);
-  const rawEmpathy = (traitPercentages.harmonizer * 2.4 + traitPercentages.supporter * 2.0);
-  const rawCreativity = (traitPercentages.creator * 2.5 + traitPercentages.individual * 1.8 + traitPercentages.idealist * 1.2);
-  const rawStability = (traitPercentages.realist * 2.0 + traitPercentages.harmonizer * 1.2 + traitPercentages.analyst * 1.0) - (anxiousChoiceCount * 2.5);
+  // Harmonized Status Calculation centered on Archetype Baseline
+  const base = matchedPersonality.status;
 
   const customStatus: PersonalityStatus = {
-    logic: Math.min(99, Math.max(15, Math.round(20 + rawLogic * 1.1))),
-    action: Math.min(99, Math.max(15, Math.round(20 + rawAction * 1.1))),
-    empathy: Math.min(99, Math.max(15, Math.round(20 + rawEmpathy * 1.1))),
-    creativity: Math.min(99, Math.max(15, Math.round(20 + rawCreativity * 1.1))),
-    stability: Math.min(99, Math.max(15, Math.round(45 + rawStability * 0.9))),
+    logic: Math.min(99, Math.max(25, Math.round(base.logic + (traitPercentages.analyst - 12) * 0.6 + (traitPercentages.realist - 12) * 0.3))),
+    action: Math.min(99, Math.max(25, Math.round(base.action + (traitPercentages.leader - 12) * 0.6 + (traitPercentages.idealist - 12) * 0.3 - anxiousChoiceCount * 1.5))),
+    empathy: Math.min(99, Math.max(25, Math.round(base.empathy + (traitPercentages.harmonizer - 12) * 0.6 + (traitPercentages.supporter - 12) * 0.3))),
+    creativity: Math.min(99, Math.max(25, Math.round(base.creativity + (traitPercentages.creator - 12) * 0.6 + (traitPercentages.individual - 12) * 0.3))),
+    stability: Math.min(99, Math.max(25, Math.round(base.stability - anxiousChoiceCount * 2.8 + (traitPercentages.realist - 12) * 0.4))),
   };
 
   const colorName = COLOR_OPTIONS.find(c => c.id === profile.auraColor)?.name || '未回答';
@@ -259,7 +267,7 @@ export function calculateDiagnosis(
 
   // Construct Rich AI Prompt
   const aiPromptText = `【本格性格診断・プロファイル分析データ】
-あなたは非常に優れた臨床心理学者およびライフコーチです。
+あなたはいま世界中で評価されている臨床心理学者およびライフコーチです。
 以下の私の診断結果および行動プロファイルデータを元に、私の強み・潜在能力・今後のキャリアや人間関係に関する具体的なアドバイスと分析を行ってください。
 
 ■ 基本プロフィール
@@ -292,13 +300,15 @@ export function calculateDiagnosis(
 ・最も相性の良いタイプ: ${matchedPersonality.affinity.bestPartnerName}
   理由: ${matchedPersonality.affinity.bestPartnerReason}
 ・注意が必要なタイプ: ${matchedPersonality.affinity.challengePartnerName}
-  理由: ${matchedPersonality.affinity.challengeReason}
+  理由: ${matchedReason(matchedPersonality)}
 
 ■ AIへのお願い
 1. 上記データから見える私の隠された才能や、仕事・プライベートでより成果を出すための「具体的な行動指針」を3つ提案してください。
 2. 今後の人生で直面しやすいストレス原因とその乗り越え方をアドバイスしてください。
 3. 私の性格タイプに最適な働き方や、周囲との関係を良くするコミュニケーション術について教えてください。
-4. 最後に、私への質問を1つ投げかけて、さらに深い対話のきっかけを作ってください。`;
+4. 私の本来持つ魅力や強みを最大限に活かす方法を教えてください。
+5. 恋愛における私の傾向・魅力・惹かれやすいタイプや注意点（恋愛系の話）と、今後の恋愛の展開や将来のパートナーシップに関する見通し・アドバイス（恋愛の今後の話）を詳しく教えてください。
+6. 最後に、私への質問を1つ投げかけて、さらに深い対話のきっかけを作ってください。`;
 
   return {
     profile,
@@ -312,4 +322,8 @@ export function calculateDiagnosis(
     aiPromptText,
     timestamp: new Date().toISOString(),
   };
+}
+
+function matchedReason(matched: PersonalityResult): string {
+  return matched.affinity.challengeReason || '互いの価値観や行動ペースにギャップが生じやすいため、意識的なコミュニケーションが必要です。';
 }

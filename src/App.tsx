@@ -84,7 +84,10 @@ export default function App() {
 強み: ${personality.description.strengths}
 注意点: ${personality.description.weaknesses}
 人間関係: ${personality.description.relationship}
-AIへのお願い: 上記プロファイルを元にアドバイスと具体的なキャリア・人間関係のアクションプランを提示してください。`,
+恋愛・パートナーシップ: ${personality.description.loveAndMarriage}
+AIへのお願い:
+1. 上記プロファイルを元にアドバイスと具体的なキャリア・人間関係のアクションプランを提示してください。
+2. 恋愛傾向や魅力、今後の恋愛展開・将来のパートナーシップに関するアドバイスも詳しく教えてください。`,
       timestamp: new Date().toISOString(),
     };
     setDiagnosisResult(mockResult);
