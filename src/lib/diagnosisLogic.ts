@@ -5,6 +5,9 @@ export interface UserProfile {
   birthdate: string;
   dominantHand: string;
   auraColor: string;
+  // 精密プロファイル（任意）
+  birthPlace?: string;
+  relationshipStatus?: string;
 }
 
 export interface ZodiacInfo {
@@ -23,6 +26,7 @@ export interface DiagnosisResult {
   customStatus: PersonalityStatus;
   aiPromptText: string;
   timestamp: string;
+  testMode?: 'quick' | 'gradient';
 }
 
 // Zodiac calculation
@@ -101,7 +105,8 @@ function calculateCosineSimilarity(
 
 export function calculateDiagnosis(
   profile: UserProfile,
-  answers: Record<number, string>
+  answers: Record<number, string>,
+  testMode: 'quick' | 'gradient' = 'quick'
 ): DiagnosisResult {
   const traitScores: Record<TraitType, number> = {
     leader: 0,
@@ -150,16 +155,57 @@ export function calculateDiagnosis(
     traitScores.creator += 1.5;
   }
 
-  // 4. Process 25 Questions
+  // 4. Process 25 Questions according to testMode
   QUESTIONS.forEach(q => {
-    const selectedChoiceId = answers[q.id];
-    if (selectedChoiceId) {
-      if (selectedChoiceId === 'e') {
+    const rawVal = answers[q.id];
+    if (!rawVal) return;
+
+    if (testMode === 'gradient') {
+      // 5-Point Scale ('1' = とてもそう思う, '2' = ややそう思う, '3' = どちらとも言えない, '4' = あまり思わない, '5' = 全く思わない)
+      const primaryChoice = q.choices[0];
+      const secondaryChoice = q.choices[1];
+
+      if (rawVal === '1') {
+        // とてもそう思う
+        if (primaryChoice) {
+          Object.entries(primaryChoice.traits).forEach(([trait, score]) => {
+            traitScores[trait as TraitType] += (score || 1) * 2.8;
+          });
+        }
+        if (secondaryChoice) {
+          Object.entries(secondaryChoice.traits).forEach(([trait, score]) => {
+            traitScores[trait as TraitType] += (score || 1) * 1.5;
+          });
+        }
+      } else if (rawVal === '2') {
+        // ややそう思う
+        if (primaryChoice) {
+          Object.entries(primaryChoice.traits).forEach(([trait, score]) => {
+            traitScores[trait as TraitType] += (score || 1) * 1.8;
+          });
+        }
+      } else if (rawVal === '3') {
+        // どちらとも言えない
+        traitScores.harmonizer += 1.5;
+        traitScores.realist += 1.2;
+      } else if (rawVal === '4') {
+        // あまり思わない
+        traitScores.analyst += 1.8;
+        traitScores.realist += 1.5;
+      } else if (rawVal === '5') {
+        // 全く思わない
+        traitScores.analyst += 2.5;
+        traitScores.realist += 2.0;
         anxiousChoiceCount++;
       }
-      const choice = q.choices.find(c => c.id === selectedChoiceId);
+    } else {
+      // Quick Mode (5 Situation choices 'a' ~ 'e')
+      if (rawVal === 'e') {
+        anxiousChoiceCount++;
+      }
+      const choice = q.choices.find(c => c.id === rawVal);
       if (choice) {
-        const weight = selectedChoiceId === 'e' ? 1.2 : 2.5;
+        const weight = rawVal === 'e' ? 1.2 : 2.5;
         Object.entries(choice.traits).forEach(([trait, score]) => {
           if (score) {
             traitScores[trait as TraitType] += score * weight;
@@ -265,15 +311,20 @@ export function calculateDiagnosis(
   const colorName = COLOR_OPTIONS.find(c => c.id === profile.auraColor)?.name || '未回答';
   const handName = DOMINANT_HAND_OPTIONS.find(h => h.id === profile.dominantHand)?.label || '右手';
 
-  // Construct Rich AI Prompt
+  // Construct Rich AI Prompt with Detailed Precision Profile
   const aiPromptText = `【本格性格診断・プロファイル分析データ】
 あなたはいま世界中で評価されている臨床心理学者およびライフコーチです。
 以下の私の診断結果および行動プロファイルデータを元に、私の強み・潜在能力・今後のキャリアや人間関係に関する具体的なアドバイスと分析を行ってください。
 
-■ 基本プロフィール
+■ 基本プロフィール＆西洋占星術データ
 ・生年月日: ${profile.birthdate || '未設定'} (${zodiac.signJP}・${zodiac.element}属性)
+・出生地: ${profile.birthPlace || '指定なし'}
 ・利き手: ${handName}
 ・直感選択カラー: ${colorName}
+
+■ 現在の環境＆ライフステータス（精密オプション）
+・恋愛ステータス: ${profile.relationshipStatus || '指定なし'}
+・診断回答モード: ${testMode === 'gradient' ? '5段階グラデーション評価モード' : 'クイックシチュエーション選択モード'}
 
 ■ 診断された性格タイプ
 ・タイプ名: ${matchedPersonality.name} (${matchedPersonality.categoryTag})
@@ -321,6 +372,7 @@ export function calculateDiagnosis(
     customStatus,
     aiPromptText,
     timestamp: new Date().toISOString(),
+    testMode,
   };
 }
 

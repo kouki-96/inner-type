@@ -42,8 +42,12 @@ export default function App() {
     setIsMuted(muted);
   };
 
-  const handleQuestionsComplete = (profile: UserProfile, answers: Record<number, string>) => {
-    const calculated = calculateDiagnosis(profile, answers);
+  const handleQuestionsComplete = (
+    profile: UserProfile,
+    answers: Record<number, string>,
+    testMode: 'quick' | 'gradient' = 'quick'
+  ) => {
+    const calculated = calculateDiagnosis(profile, answers, testMode);
     setDiagnosisResult(calculated);
     setScreen('loading');
 

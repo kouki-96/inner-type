@@ -263,7 +263,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           }`}
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>AI分析</span>
+          <span>AIプロンプト</span>
         </button>
       </div>
 
@@ -525,43 +525,41 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       )}
 
-      {/* TAB 5: SELF PROFILE AI PROMPT ("私について") */}
+      {/* TAB 5: AI PROMPT COPY FOR EXTERNAL AI */}
       {activeTab === 'aiprompt' && (
         <div className="w-full space-y-4 animate-fade-in text-xs sm:text-sm my-2">
-          <div className="glass-card rounded-2xl p-5 border border-amber-500/30 bg-amber-950/20 space-y-3">
-            <div className="flex items-center justify-between border-b border-amber-500/20 pb-2">
-              <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span>私について（AI用プロンプト生成）</span>
+          <div className="glass-card rounded-2xl p-5 border-2 border-indigo-500/40 bg-gradient-to-br from-indigo-950/40 via-purple-950/30 to-slate-950/60 space-y-4 shadow-2xl relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-indigo-500/30 pb-3">
+              <div className="flex items-center gap-2 text-amber-300 font-bold text-sm sm:text-base">
+                <Sparkles className="w-5 h-5 text-amber-300" />
+                <span>🔮 AI深層分析用 プロンプト生成＆コピー</span>
               </div>
-              <span className="text-[10px] bg-amber-900/80 text-amber-200 px-2 py-0.5 rounded-full border border-amber-500/30">
-                PROMPT GENERATOR
+              <span className="text-[10px] bg-gradient-to-r from-amber-500 to-indigo-600 text-slate-950 font-extrabold px-3 py-1 rounded-full shadow-md">
+                FOR AI CHAT
               </span>
             </div>
 
-            <p className="text-slate-300 leading-relaxed text-xs">
-              あなたの生年月日、基本属性、25問の診断結果、思考ステータスを詳細に組み込んだAI分析用プロンプトです。下の「プロンプトをコピーする」ボタンを押し、ChatGPTやGeminiなどの外部AIチャットに貼り付けて送ると、さらに詳細なアドバイスや悩み相談を受けることができます。
+            <p className="text-slate-200 leading-relaxed text-xs">
+              あなたの回答データ・基本プロファイル・ホロスコープ属性を統合した高精度なプロンプトです。下のボタンでコピーし、ChatGPTやGemini Webなどの外部AIに貼り付けることで、さらに深層的な性格分析やアドバイスを受けられます。
             </p>
 
-            {/* Prompt Text Box */}
-            <div className="bg-slate-950/90 rounded-xl p-3.5 border border-slate-800 text-[11px] font-mono text-slate-300 whitespace-pre-wrap max-h-64 overflow-y-auto leading-relaxed select-all shadow-inner">
+            <div className="bg-slate-950/90 rounded-2xl p-4 border border-indigo-500/30 text-xs font-mono text-slate-200 whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed select-all shadow-inner">
               {aiPromptText}
             </div>
 
-            {/* Copy Action Button */}
-            <div className="pt-1">
+            <div className="pt-2">
               <button
                 onClick={handleCopyPrompt}
-                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-bold text-xs shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 border border-amber-300/40"
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 font-bold text-sm shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 border border-amber-300/40 min-h-[52px]"
               >
                 {copied ? (
                   <>
-                    <Check className="w-4.5 h-4.5 text-slate-950 stroke-[3]" />
+                    <Check className="w-5 h-5 text-slate-950 stroke-[3]" />
                     <span>クリップボードにコピー完了！AIチャットに貼り付けてください</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4.5 h-4.5 text-slate-950" />
+                    <Copy className="w-5 h-5 text-slate-950" />
                     <span>AI用プロンプトをコピーする</span>
                   </>
                 )}
