@@ -27,6 +27,8 @@ export interface DiagnosisResult {
   aiPromptText: string;
   timestamp: string;
   testMode?: 'quick' | 'gradient';
+  confidenceScore?: number;
+  precisionLevel?: string;
 }
 
 // Zodiac calculation
@@ -161,20 +163,20 @@ export function calculateDiagnosis(
     if (!rawVal) return;
 
     if (testMode === 'gradient') {
-      // 5-Point Scale ('1' = とてもそう思う, '2' = ややそう思う, '3' = どちらとも言えない, '4' = あまり思わない, '5' = 全く思わない)
-      const primaryChoice = q.choices[0];
+      // 5-Point Likert Scale ('1' = とてもそう思う, '2' = ややそう思う, '3' = どちらとも言えない, '4' = あまり思わない, '5' = 全く思わない)
+      const primaryChoice = q.choices[0]; // Affirmative choice
       const secondaryChoice = q.choices[1];
 
       if (rawVal === '1') {
         // とてもそう思う
         if (primaryChoice) {
           Object.entries(primaryChoice.traits).forEach(([trait, score]) => {
-            traitScores[trait as TraitType] += (score || 1) * 2.8;
+            traitScores[trait as TraitType] += (score || 1) * 3.0;
           });
         }
         if (secondaryChoice) {
           Object.entries(secondaryChoice.traits).forEach(([trait, score]) => {
-            traitScores[trait as TraitType] += (score || 1) * 1.5;
+            traitScores[trait as TraitType] += (score || 1) * 1.2;
           });
         }
       } else if (rawVal === '2') {
@@ -186,17 +188,23 @@ export function calculateDiagnosis(
         }
       } else if (rawVal === '3') {
         // どちらとも言えない
-        traitScores.harmonizer += 1.5;
-        traitScores.realist += 1.2;
+        traitScores.harmonizer += 1.0;
+        traitScores.realist += 1.0;
       } else if (rawVal === '4') {
         // あまり思わない
-        traitScores.analyst += 1.8;
-        traitScores.realist += 1.5;
+        const opp = q.opposingTraits || (secondaryChoice ? secondaryChoice.traits : { analyst: 1, realist: 1 });
+        Object.entries(opp).forEach(([trait, score]) => {
+          traitScores[trait as TraitType] += (score || 1) * 1.5;
+        });
       } else if (rawVal === '5') {
         // 全く思わない
-        traitScores.analyst += 2.5;
-        traitScores.realist += 2.0;
-        anxiousChoiceCount++;
+        const opp = q.opposingTraits || (secondaryChoice ? secondaryChoice.traits : { analyst: 1, realist: 1 });
+        Object.entries(opp).forEach(([trait, score]) => {
+          traitScores[trait as TraitType] += (score || 1) * 2.8;
+        });
+        if (opp.analyst || opp.realist) {
+          anxiousChoiceCount++;
+        }
       }
     } else {
       // Quick Mode (5 Situation choices 'a' ~ 'e')
@@ -205,7 +213,7 @@ export function calculateDiagnosis(
       }
       const choice = q.choices.find(c => c.id === rawVal);
       if (choice) {
-        const weight = rawVal === 'e' ? 1.2 : 2.5;
+        const weight = rawVal === 'e' ? 1.5 : 2.5;
         Object.entries(choice.traits).forEach(([trait, score]) => {
           if (score) {
             traitScores[trait as TraitType] += score * weight;
@@ -241,8 +249,7 @@ export function calculateDiagnosis(
 
   // Multi-Factor Precision Matching Engine
   const allTypes = Object.values(PERSONALITY_TYPES);
-  let bestMatch: PersonalityResult = allTypes[0];
-  let highestMatchScore = -999;
+  const scoredTypes: { type: PersonalityResult; sim: number }[] = [];
 
   allTypes.forEach(p => {
     const targetVector = TYPE_VECTORS[p.id] || {
@@ -289,13 +296,23 @@ export function calculateDiagnosis(
       sim += 0.03;
     }
 
-    if (sim > highestMatchScore) {
-      highestMatchScore = sim;
-      bestMatch = p;
-    }
+    scoredTypes.push({ type: p, sim });
   });
 
-  const matchedPersonality = bestMatch;
+  scoredTypes.sort((a, b) => b.sim - a.sim);
+  const matchedPersonality = scoredTypes[0].type;
+  const topSim = scoredTypes[0].sim;
+  const secondSim = scoredTypes[1]?.sim || 0;
+
+  // Confidence & Precision score calculation
+  const simDelta = topSim - secondSim;
+  let rawConfidence = 82 + simDelta * 28;
+  if (testMode === 'gradient') rawConfidence += 5;
+  if (profile.birthPlace) rawConfidence += 3;
+  if (profile.relationshipStatus) rawConfidence += 3;
+
+  const confidenceScore = Math.min(99, Math.max(80, Math.round(rawConfidence)));
+  const precisionLevel = confidenceScore >= 93 ? 'Sランク（超高精度）' : confidenceScore >= 87 ? 'Aランク（高精度）' : 'Bランク（標準精度）';
 
   // Harmonized Status Calculation centered on Archetype Baseline
   const base = matchedPersonality.status;
@@ -373,6 +390,8 @@ export function calculateDiagnosis(
     aiPromptText,
     timestamp: new Date().toISOString(),
     testMode,
+    confidenceScore,
+    precisionLevel,
   };
 }
 

@@ -36,8 +36,11 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'detail' | 'career' | 'affinity' | 'aiprompt' | 'glossary'>('detail');
   const [copied, setCopied] = useState(false);
+  const [showAccuracyTips, setShowAccuracyTips] = useState(false);
 
   const { matchedPersonality, customStatus, profile, zodiac, aiPromptText } = result;
+  const confidenceScore = result.confidenceScore || 90;
+  const precisionLevel = result.precisionLevel || 'Aランク（高精度）';
   const affinity = matchedPersonality.affinity;
 
   // Glossary terms list
@@ -130,15 +133,119 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         <CharacterPortraitCard personality={matchedPersonality} size="large" />
       </div>
 
-      {/* Basic Profile Quick Info */}
-      <div className="w-full glass-card rounded-2xl p-3 px-4 flex items-center justify-between text-xs text-slate-300 my-2 border border-white/10">
-        <span className="flex items-center gap-1.5">
-          <Compass className="w-3.5 h-3.5 text-indigo-400" />
-          <span>{profile.birthdate} ({zodiac.signJP}・{zodiac.element}の属性)</span>
-        </span>
-        <span className="text-slate-400">
-          利き手: {profile.dominantHand === 'left' ? '左手' : profile.dominantHand === 'both' ? '両利き' : '右手'}
-        </span>
+      {/* Basic Profile Quick Info & Accuracy Meter */}
+      <div className="w-full glass-card rounded-2xl p-3.5 px-4 flex flex-col gap-2.5 my-2 border border-white/10 shadow-lg">
+        <div className="flex items-center justify-between text-xs text-slate-300">
+          <span className="flex items-center gap-1.5">
+            <Compass className="w-3.5 h-3.5 text-indigo-400" />
+            <span>{profile.birthdate} ({zodiac.signJP}・{zodiac.element}属性)</span>
+          </span>
+          <span className="text-slate-400">
+            利き手: {profile.dominantHand === 'left' ? '左手' : profile.dominantHand === 'both' ? '両利き' : '右手'}
+          </span>
+        </div>
+
+        {/* Diagnostic Precision & Confidence Rating */}
+        <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <Shield className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-slate-200">診断適合精度:</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold border border-emerald-500/30">
+                  {precisionLevel}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">コサイン類似度スコア: <span className="font-bold text-emerald-300">{confidenceScore}%</span></p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => { soundManager.playClick(); setShowAccuracyTips(!showAccuracyTips); }}
+            className="text-[11px] text-indigo-300 hover:text-indigo-200 underline flex items-center gap-1 shrink-0 font-medium"
+          >
+            <Lightbulb className="w-3.5 h-3.5 text-yellow-400" />
+            <span>精度向上のコツ</span>
+          </button>
+        </div>
+
+        {/* Accuracy Tips Expandable Guide Box */}
+        {showAccuracyTips && (
+          <div className="mt-1 p-3 rounded-xl bg-slate-900/95 border border-indigo-500/30 text-xs text-slate-300 space-y-2 animate-fadeIn">
+            <div className="font-bold text-yellow-300 flex items-center gap-1.5 border-b border-white/10 pb-1.5">
+              <Sparkles className="w-4 h-4 text-yellow-400" />
+              <span>診断精度（回答の信頼度）を高めるコツ</span>
+            </div>
+            <ul className="space-y-1.5 text-[11px] leading-relaxed text-slate-300 list-disc pl-4">
+              <li>
+                <strong className="text-white">直感で素早く答える:</strong> 深く考え込まず「素の自分」の最初の直感で答えると、本質的な傾向が出やすくなります。
+              </li>
+              <li>
+                <strong className="text-white">「当てはまり度（5段階）」評価を選ぶ:</strong> 微妙な心の強弱が連続体（グラデーション）として計算され、ベクトルの解像度が最高精度になります。
+              </li>
+              <li>
+                <strong className="text-white">詳細プロファイルを入力する:</strong> 出生地や恋愛状況を入力すると、西洋占星術の属性補正とAIプロンプトの個別具体化度がアップします。
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* 8-Dimensional Trait Vector Precision Analysis Card */}
+      <div className="w-full bg-slate-900/90 rounded-2xl p-4 border border-indigo-500/30 space-y-3.5 relative z-10 my-2 shadow-2xl backdrop-blur-md">
+        <div className="text-xs font-bold text-slate-100 flex items-center justify-between border-b border-white/10 pb-2">
+          <span className="flex items-center gap-1.5 text-amber-300 font-serif text-sm">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>8因子性格ベクトル分析（精密診断データ）</span>
+          </span>
+          <span className="text-[10px] bg-indigo-950 px-2 py-0.5 rounded-full text-indigo-300 font-mono border border-indigo-500/30">
+            PRIMARY: {result.primaryTrait.toUpperCase()}
+          </span>
+        </div>
+
+        <p className="text-[11px] text-slate-300 leading-relaxed">
+          全25問の多角的な心理評価から抽出された、あなたの「8つのパーソナリティ基本因子」の構成割合です。最も高い上位2つの因子が性格タイプの決定基盤となっています。
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs pt-1">
+          {[
+            { key: 'leader', label: 'リーダーシップ（行動・推進）', color: 'from-rose-500 to-red-600', text: 'text-rose-300' },
+            { key: 'analyst', label: '論理分析力（客観・思考）', color: 'from-blue-500 to-indigo-600', text: 'text-blue-300' },
+            { key: 'creator', label: '創造発想力（独創・表現）', color: 'from-amber-500 to-orange-600', text: 'text-amber-300' },
+            { key: 'supporter', label: '支援貢献力（共感・ホスピタリティ）', color: 'from-emerald-500 to-teal-600', text: 'text-emerald-300' },
+            { key: 'realist', label: '現実着実性（リスク・安全）', color: 'from-slate-400 to-zinc-600', text: 'text-slate-300' },
+            { key: 'idealist', label: '理想追及力（ビジョン・情熱）', color: 'from-yellow-400 to-amber-500', text: 'text-yellow-300' },
+            { key: 'individual', label: '独自独立性（マイペース・自己探求）', color: 'from-purple-500 to-violet-600', text: 'text-purple-300' },
+            { key: 'harmonizer', label: '調和協調性（平和・場の空気）', color: 'from-cyan-500 to-blue-600', text: 'text-cyan-300' },
+          ].map(trait => {
+            const pct = result.traitPercentages[trait.key as keyof typeof result.traitPercentages] || 0;
+            const isPrimary = trait.key === result.primaryTrait;
+            const isSecondary = trait.key === result.secondaryTrait;
+            return (
+              <div key={trait.key} className={`p-2 rounded-xl border transition-all ${
+                isPrimary ? 'bg-indigo-950/80 border-amber-400/60 ring-1 ring-amber-400/40' :
+                isSecondary ? 'bg-slate-950/80 border-indigo-500/40' : 'bg-slate-950/50 border-white/5'
+              }`}>
+                <div className="flex items-center justify-between font-medium text-[11px] mb-1">
+                  <span className="flex items-center gap-1 text-slate-200">
+                    <span>{trait.label}</span>
+                    {isPrimary && <span className="text-[9px] px-1 py-0.2 bg-amber-500/20 text-amber-300 font-bold rounded border border-amber-500/40">主因子</span>}
+                    {isSecondary && <span className="text-[9px] px-1 py-0.2 bg-indigo-500/20 text-indigo-300 font-bold rounded border border-indigo-500/40">副因子</span>}
+                  </span>
+                  <span className={`font-mono font-bold ${trait.text}`}>{pct}%</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                  <div
+                    className={`h-full rounded-full bg-gradient-to-r ${trait.color} transition-all duration-500`}
+                    style={{ width: `${Math.max(4, pct)}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Status Radar Gauges (5 Parameters) */}

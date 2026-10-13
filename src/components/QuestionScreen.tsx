@@ -473,45 +473,75 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
           {/* Question Box */}
           <div key={currentQ.id} className="glass-panel rounded-3xl p-5 sm:p-7 my-auto space-y-5 border border-white/10 shadow-2xl relative overflow-hidden animate-fade-in">
-            <h3 className="text-base sm:text-lg font-bold text-slate-100 leading-relaxed">
-              {currentQ.question}
-            </h3>
 
             {/* Mode A: QUICK 5 SITUATION CHOICES */}
             {testMode === 'quick' && (
-              <div className="space-y-2 pt-1">
-                {currentQ.choices.map((choice) => {
-                  const isSelected = answers[currentQ.id] === choice.id;
-                  return (
-                    <button
-                      key={`${currentQ.id}-${choice.id}`}
-                      type="button"
-                      disabled={isTransitioning}
-                      onClick={() => handleSelectAnswer(currentQ.id, choice.id)}
-                      className={`w-full p-3 sm:p-3.5 rounded-2xl text-left text-xs sm:text-sm transition-all duration-200 flex items-center justify-between group min-h-[46px] ${
-                        isSelected
-                          ? 'bg-indigo-900/80 border-indigo-400 text-white font-semibold shadow-lg'
-                          : 'glass-card border-slate-800/80 text-slate-200 hover:border-indigo-400/50 hover:bg-slate-800/80'
-                      }`}
-                    >
-                      <span className="leading-relaxed pr-2">{choice.text}</span>
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${
-                        isSelected ? 'border-indigo-400 bg-indigo-400 text-slate-950' : 'border-slate-600 group-hover:border-indigo-400'
-                      }`}>
-                        {isSelected ? <CheckCircle2 className="w-3.5 h-3.5 fill-indigo-400 text-slate-950" /> : <div className="w-1 h-1 rounded-full bg-transparent group-hover:bg-indigo-400/50" />}
-                      </div>
-                    </button>
-                  );
-                })}
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>場面シチュエーション質問</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-100 leading-relaxed">
+                    {currentQ.question}
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    あなたの日常の行動に最も近い選択肢を1つ選んでください：
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  {currentQ.choices.map((choice) => {
+                    const isSelected = answers[currentQ.id] === choice.id;
+                    return (
+                      <button
+                        key={`${currentQ.id}-${choice.id}`}
+                        type="button"
+                        disabled={isTransitioning}
+                        onClick={() => handleSelectAnswer(currentQ.id, choice.id)}
+                        className={`w-full p-3 sm:p-3.5 rounded-2xl text-left text-xs sm:text-sm transition-all duration-200 flex items-center justify-between group min-h-[46px] ${
+                          isSelected
+                            ? 'bg-indigo-900/80 border-indigo-400 text-white font-semibold shadow-lg'
+                            : 'glass-card border-slate-800/80 text-slate-200 hover:border-indigo-400/50 hover:bg-slate-800/80'
+                        }`}
+                      >
+                        <span className="leading-relaxed pr-2">{choice.text}</span>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                          isSelected ? 'border-indigo-400 bg-indigo-400 text-slate-950' : 'border-slate-600 group-hover:border-indigo-400'
+                        }`}>
+                          {isSelected ? <CheckCircle2 className="w-3.5 h-3.5 fill-indigo-400 text-slate-950" /> : <div className="w-1 h-1 rounded-full bg-transparent group-hover:bg-indigo-400/50" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Mode B: GRADIENT 5-POINT LIKERT SCALE */}
+            {/* Mode B: GRADIENT 5-POINT DEGREE SCALE */}
             {testMode === 'gradient' && (
-              <div className="space-y-2.5 pt-1">
-                <p className="text-[11px] text-indigo-300 font-medium">
-                  この状況や質問の前提について、あなたの日常の感覚で最も近い評価を選択してください：
+              <div className="space-y-4 animate-fade-in">
+                <div className="space-y-2">
+                  <div className="text-[10px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span>当てはまり度診断（5段階評価）</span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-950/90 via-purple-950/80 to-slate-900/90 border border-amber-400/40 text-indigo-100 shadow-inner space-y-1">
+                    <div className="text-[10px] uppercase font-bold text-amber-300 tracking-wider flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-300" />
+                      <span>診断メッセージ</span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-bold text-yellow-100 leading-relaxed">
+                      「{currentQ.statement}」
+                    </h3>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-slate-300 font-medium">
+                  この考えや行動パターンは、日常のあなたにどれくらい当てはまりますか？
                 </p>
+
                 <div className="grid grid-cols-1 gap-2">
                   {GRADIENT_SCALE_OPTIONS.map((scaleOpt) => {
                     const isSelected = answers[currentQ.id] === scaleOpt.id;

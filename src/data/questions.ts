@@ -10,6 +10,8 @@ export interface Question {
   id: number;
   categoryLabel: string;
   question: string;
+  statement: string; // Used in 5-point Likert gradient mode for high accuracy
+  opposingTraits?: Partial<Record<TraitType, number>>; // Traits boosted when answering '4' or '5' in gradient mode
   choices: QuestionChoice[];
 }
 
@@ -44,18 +46,22 @@ export const QUESTIONS: Question[] = [
     id: 1,
     categoryLabel: '休日の過ごし方',
     question: '急に予定が空いた休日、どう過ごすことが多い？',
+    statement: '急に予定が空いた休日は、友人や仲間を自分から誘ってお出かけやイベントに行きたい',
+    opposingTraits: { analyst: 2, individual: 2 },
     choices: [
       { id: 'a', text: '友達を誘ってお出かけや買いものに行く', traits: { leader: 2, harmonizer: 1 } },
       { id: 'b', text: '家でゆっくり動画や本を見ながら過ごす', traits: { analyst: 2, individual: 1 } },
       { id: 'c', text: '趣味や創作、気になっていた作業に没頭する', traits: { creator: 2, idealist: 1 } },
       { id: 'd', text: '部屋の片付けや溜まった家事をすっきり済ませる', traits: { realist: 2, supporter: 1 } },
-      { id: 'e', text: '急な変更に戸惑い、何をすればいいかわからずダラダラ過してしまう', traits: { harmonizer: 2, supporter: 1 } },
+      { id: 'e', text: '急な変更に戸惑い、何をすればいいかわからずダラダラ過ごしてしまう', traits: { harmonizer: 2, supporter: 1 } },
     ]
   },
   {
     id: 2,
     categoryLabel: 'グループでの役割',
     question: 'みんなでお出かけするとき、自然とどんな立ち位置になる？',
+    statement: '大勢で出かけるときは、自分から行先やスケジュールを提案して引っ張る役割になる',
+    opposingTraits: { harmonizer: 2, supporter: 1 },
     choices: [
       { id: 'a', text: '「ここ行こう！」と行先やスケジュールを提案する役割', traits: { leader: 2, idealist: 1 } },
       { id: 'b', text: '予約や移動手段、予算などをしっかり確認する役割', traits: { analyst: 2, realist: 1 } },
@@ -68,6 +74,8 @@ export const QUESTIONS: Question[] = [
     id: 3,
     categoryLabel: '悩んだときの対応',
     question: '仕事や人間関係で困ったとき、どう行動することが多い？',
+    statement: '困ったことが起きたときは、親しい人にすぐ相談してアドバイスをもらう',
+    opposingTraits: { analyst: 2, individual: 2 },
     choices: [
       { id: 'a', text: '親しい友人や家族にすぐ相談して意見を聞く', traits: { supporter: 2, harmonizer: 1 } },
       { id: 'b', text: 'ネットや本でじっくり調べて自分で解決策を探す', traits: { analyst: 2, realist: 1 } },
@@ -80,6 +88,8 @@ export const QUESTIONS: Question[] = [
     id: 4,
     categoryLabel: '買い物のスタイル',
     question: '少し高価な買い物をするとき、決め手になるのは？',
+    statement: '高価な買い物をするときは、機能・口コミ・価格をじっくり比較調査して決める',
+    opposingTraits: { creator: 2, idealist: 1 },
     choices: [
       { id: 'a', text: '口コミや機能、価格を他と比較してから買う', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '「これだ！」と一目惚れした直感で決める', traits: { creator: 2, idealist: 1 } },
@@ -92,6 +102,8 @@ export const QUESTIONS: Question[] = [
     id: 5,
     categoryLabel: 'トラブルへの対応',
     question: '予定外のハプニングが起きたら、どう対応する？',
+    statement: '予定外のトラブルが発生した時は、焦らず原因を論理的に整理して対処する',
+    opposingTraits: { leader: 2, creator: 1 },
     choices: [
       { id: 'a', text: '落ち着いて原因を確かめ、別のプランを立てる', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '「なんとかなる！」と臨機応変に切り替える', traits: { creator: 2, individual: 1 } },
@@ -104,6 +116,8 @@ export const QUESTIONS: Question[] = [
     id: 6,
     categoryLabel: '連絡のペース',
     question: 'メッセージやLINEの返信スタンスはどれに近い？',
+    statement: 'メッセージを受け取ったら、気づいた瞬間にすぐ返信するタイプだ',
+    opposingTraits: { individual: 2, analyst: 1 },
     choices: [
       { id: 'a', text: '気づいたらその場ですぐ返す', traits: { supporter: 2, leader: 1 } },
       { id: 'b', text: '文章をきちんと考えてから落ち着いて返す', traits: { analyst: 2, realist: 1 } },
@@ -116,6 +130,8 @@ export const QUESTIONS: Question[] = [
     id: 7,
     categoryLabel: '褒められたとき',
     question: '人から「すごいね！」と褒められたとき、心の中ではどう思う？',
+    statement: '周りから褒められると、素直に誇らしくなりさらに上を目指す意欲が湧く',
+    opposingTraits: { harmonizer: 2, analyst: 1 },
     choices: [
       { id: 'a', text: '素直に嬉しくて「もっと頑張ろう！」とテンションが上がる', traits: { leader: 2, idealist: 1 } },
       { id: 'b', text: 'ちょっと照れくさくて「自分なんてまだまだ」と遠慮する', traits: { harmonizer: 2, supporter: 1 } },
@@ -128,6 +144,8 @@ export const QUESTIONS: Question[] = [
     id: 8,
     categoryLabel: '人間関係のスタンス',
     question: '人間関係で一番心地いいと感じる距離感は？',
+    statement: '心から深く信頼できる少人数のパートナーや友人とだけじっくり付き合いたい',
+    opposingTraits: { harmonizer: 2, leader: 1 },
     choices: [
       { id: 'a', text: '心から信頼できるごく少数の人と深く付き合いたい', traits: { individual: 2, analyst: 1 } },
       { id: 'b', text: 'いろんなタイプの人と広く浅く楽しくつながりたい', traits: { harmonizer: 2, leader: 1 } },
@@ -140,6 +158,8 @@ export const QUESTIONS: Question[] = [
     id: 9,
     categoryLabel: 'モチベーション',
     question: '一番「やる気」スイッチが入るのはどんなとき？',
+    statement: '自分の目標や夢を自分の力で達成したいというチャレンジ精神があるときに燃える',
+    opposingTraits: { supporter: 2, harmonizer: 1 },
     choices: [
       { id: 'a', text: '自分の力で何かを達成したい目標があるとき', traits: { leader: 2, idealist: 1 } },
       { id: 'b', text: '誰かに「助かった、ありがとう」と感謝されたとき', traits: { supporter: 2, harmonizer: 1 } },
@@ -152,6 +172,8 @@ export const QUESTIONS: Question[] = [
     id: 10,
     categoryLabel: 'リフレッシュ方法',
     question: '疲れたときの一番のリフレッシュ方法は？',
+    statement: '疲れたときは一人きりで静かに自分の世界に没頭するのが一番回復する',
+    opposingTraits: { harmonizer: 2, leader: 1 },
     choices: [
       { id: 'a', text: '美味しいものを食べたり体を動かしてストレス発散する', traits: { leader: 2, creator: 1 } },
       { id: 'b', text: '一人で静かに過ごしたりゲームや本に没頭する', traits: { individual: 2, analyst: 1 } },
@@ -164,6 +186,8 @@ export const QUESTIONS: Question[] = [
     id: 11,
     categoryLabel: '自分の長所',
     question: '自分の「得意なところ」を強いて言うならどれ？',
+    statement: '物事を迅速かつ決断力を持って推し進める実行力が強みだと思う',
+    opposingTraits: { supporter: 2, analyst: 1 },
     choices: [
       { id: 'a', text: '物事をサクサク進める決断力と実行力', traits: { leader: 2, realist: 1 } },
       { id: 'b', text: '相手の気持ちに寄り添える優しさと傾聴力', traits: { supporter: 2, harmonizer: 1 } },
@@ -176,6 +200,8 @@ export const QUESTIONS: Question[] = [
     id: 12,
     categoryLabel: '仕事や作業の進め方',
     question: 'タスクや作業を進めるとき、自分に合っているスタイルは？',
+    statement: '最初に緻密なスケジュールを立てて順番通り着実に進めるのが得意だ',
+    opposingTraits: { creator: 2, individual: 1 },
     choices: [
       { id: 'a', text: '最初にスケジュールをしっかり立てて順番通りに進める', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '締め切り間際に集中力を高めて一気に片付ける', traits: { creator: 2, individual: 1 } },
@@ -188,6 +214,8 @@ export const QUESTIONS: Question[] = [
     id: 13,
     categoryLabel: '意見の食い違い',
     question: '話し合いで自分の考えと他人の意見が分かれたら？',
+    statement: '他人の意見と食い違ったときは、自分の考えの理由を論理的にきちんと説明する',
+    opposingTraits: { supporter: 2, harmonizer: 1 },
     choices: [
       { id: 'a', text: '自分の考えの理由やメリットを論理的に説明する', traits: { analyst: 2, leader: 1 } },
       { id: 'b', text: 'お互いのいいところを取り入れた折衷案を探す', traits: { harmonizer: 2, supporter: 1 } },
@@ -200,6 +228,8 @@ export const QUESTIONS: Question[] = [
     id: 14,
     categoryLabel: '新しい挑戦',
     question: '未経験のことや新しい環境にチャレンジするときは？',
+    statement: '不安よりもワクワク感が勝り、新しい未知の領域へ積極的に飛び込む',
+    opposingTraits: { analyst: 2, realist: 1 },
     choices: [
       { id: 'a', text: '不安よりもワクワク感が勝って思い切って飛び込む', traits: { leader: 2, idealist: 1 } },
       { id: 'b', text: 'リスクや準備項目を調べてから慎重に挑む', traits: { analyst: 2, realist: 1 } },
@@ -212,6 +242,8 @@ export const QUESTIONS: Question[] = [
     id: 15,
     categoryLabel: '価値観',
     question: '日常の中で大切にしたいテーマはどれに近い？',
+    statement: '周りの期待や常識に縛られず、自分らしく自由に選択できる生活を重視したい',
+    opposingTraits: { realist: 2, supporter: 1 },
     choices: [
       { id: 'a', text: '自由（周りに縛られず自分らしくいること）', traits: { individual: 2, creator: 1 } },
       { id: 'b', text: '安心（平穏で安全な生活と信頼関係）', traits: { realist: 2, supporter: 1 } },
@@ -224,6 +256,8 @@ export const QUESTIONS: Question[] = [
     id: 16,
     categoryLabel: '周囲からの評価',
     question: '周りの人から言われることが多い言葉は？',
+    statement: '周囲の人から「しっかりしていて頼りになる」「任せて安心」と言われることが多い',
+    opposingTraits: { creator: 2, individual: 1 },
     choices: [
       { id: 'a', text: '「しっかりしていて頼りになるね」', traits: { leader: 2, analyst: 1 } },
       { id: 'b', text: '「話しやすくて優しいね」', traits: { supporter: 2, harmonizer: 1 } },
@@ -236,6 +270,8 @@ export const QUESTIONS: Question[] = [
     id: 17,
     categoryLabel: '約束の時間',
     question: '待ち合わせの時、到着するタイミングはどれが多い？',
+    statement: '約束の時間より必ず10分以上前に到着して余裕を持って待つタイプだ',
+    opposingTraits: { creator: 2, individual: 1 },
     choices: [
       { id: 'a', text: '10分以上前には着いて余裕を持って待つ', traits: { realist: 2, analyst: 1 } },
       { id: 'b', text: 'ちょうど良い時間や数分前に着く', traits: { supporter: 2, harmonizer: 1 } },
@@ -248,6 +284,8 @@ export const QUESTIONS: Question[] = [
     id: 18,
     categoryLabel: '失敗したとき',
     question: '何か失敗して落ち込んだとき、どう立ち直る？',
+    statement: '失敗したときは原因を分析して、何が悪かったのか改善ポイントを特定する',
+    opposingTraits: { leader: 2, idealist: 1 },
     choices: [
       { id: 'a', text: '何が悪かったか原因を分析して次に活かす', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '「次は絶対成功させる！」と前向きに切り替える', traits: { leader: 2, idealist: 1 } },
@@ -260,6 +298,8 @@ export const QUESTIONS: Question[] = [
     id: 19,
     categoryLabel: '身の回りの整理',
     question: 'デスクや部屋の整理整頓はどんな状態？',
+    statement: '物の定位置をキッチリ決めており、部屋やデスクは常に整理整頓されている',
+    opposingTraits: { creator: 2, individual: 1 },
     choices: [
       { id: 'a', text: '物の定位置が決まっていて、いつも片付いている', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '一見散らかって見えても、自分の中ではどこにあるかわかる', traits: { creator: 2, individual: 1 } },
@@ -272,6 +312,8 @@ export const QUESTIONS: Question[] = [
     id: 20,
     categoryLabel: 'パートナーシップ',
     question: '恋人や親しいパートナーに一番求めるものは？',
+    statement: 'パートナーにはお互いの時間や価値観を尊重できる自立感を一番求めたい',
+    opposingTraits: { supporter: 2, harmonizer: 1 },
     choices: [
       { id: 'a', text: '包み込んでくれるような安心感と優しさ', traits: { supporter: 2, harmonizer: 1 } },
       { id: 'b', text: 'お互いの1人の時間や趣味を尊重できる自立心', traits: { individual: 2, analyst: 1 } },
@@ -284,6 +326,8 @@ export const QUESTIONS: Question[] = [
     id: 21,
     categoryLabel: '情報の接し方',
     question: 'SNSやニュースを見ているときの行動パターンは？',
+    statement: '役立つデータや役立つ知識・情報を検索し、保存・分析することが多い',
+    opposingTraits: { harmonizer: 2, creator: 1 },
     choices: [
       { id: 'a', text: '役立つ知識や気になる情報を積極的に収集・保存する', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '友達の投稿にリアクションやコメントをする', traits: { harmonizer: 2, supporter: 1 } },
@@ -296,6 +340,8 @@ export const QUESTIONS: Question[] = [
     id: 22,
     categoryLabel: '目標の立て方',
     question: '目標ややりたいことを決めるときはどうする？',
+    statement: '具体的に数値や期限を定めてロードマップを作るタイプだ',
+    opposingTraits: { idealist: 2, creator: 1 },
     choices: [
       { id: 'a', text: '具体的な数字や期限を決めて計画を作る', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '「こうなったら良いな」という理想のイメージを描く', traits: { idealist: 2, leader: 1 } },
@@ -308,6 +354,8 @@ export const QUESTIONS: Question[] = [
     id: 23,
     categoryLabel: '話し合いでの発言',
     question: '会議や大勢での話し合いでのスタンスは？',
+    statement: '意見を求められたら理由を明確にして自分の結論をしっかり発言する',
+    opposingTraits: { harmonizer: 2, supporter: 1 },
     choices: [
       { id: 'a', text: '考えがまとまったらハッキリ自分の意見を伝える', traits: { leader: 2, analyst: 1 } },
       { id: 'b', text: '全体の空気や他の人の発言を聞いてから話す', traits: { harmonizer: 2, supporter: 1 } },
@@ -320,6 +368,8 @@ export const QUESTIONS: Question[] = [
     id: 24,
     categoryLabel: 'お店選び',
     question: '外食するお店を選ぶときの基準は？',
+    statement: '事前に口コミや評価、メニュー内容を徹底比較して安心できるお店を選ぶ',
+    opposingTraits: { creator: 2, idealist: 1 },
     choices: [
       { id: 'a', text: '評価や口コミ、メニューの内容を確認したお店', traits: { analyst: 2, realist: 1 } },
       { id: 'b', text: '一緒に行く人の好みやリクエストを最優先', traits: { supporter: 2, harmonizer: 1 } },
@@ -332,6 +382,8 @@ export const QUESTIONS: Question[] = [
     id: 25,
     categoryLabel: '将来のイメージ',
     question: '自分が「目指したい姿」に一番近いものは？',
+    statement: '将来はリーダーとして周囲から信頼され人々を良い方向へ導く存在でありたい',
+    opposingTraits: { individual: 2, realist: 1 },
     choices: [
       { id: 'a', text: '周りから頼りにされ、人を導いていける存在', traits: { leader: 2, idealist: 1 } },
       { id: 'b', text: 'ブレずにマイペースで自分の好きを極める存在', traits: { individual: 2, creator: 1 } },
@@ -341,3 +393,4 @@ export const QUESTIONS: Question[] = [
     ]
   }
 ];
+
