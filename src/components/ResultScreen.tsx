@@ -34,11 +34,30 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   onRestart,
   onOpenAllTypes,
 }) => {
-  const [activeTab, setActiveTab] = useState<'detail' | 'career' | 'affinity' | 'aiprompt'>('detail');
+  const [activeTab, setActiveTab] = useState<'detail' | 'career' | 'affinity' | 'aiprompt' | 'glossary'>('detail');
   const [copied, setCopied] = useState(false);
 
   const { matchedPersonality, customStatus, profile, zodiac, aiPromptText } = result;
   const affinity = matchedPersonality.affinity;
+
+  // Glossary terms list
+  const GLOSSARY_ITEMS = [
+    { term: 'ストラテジスト', meaning: '【戦略参謀】', desc: '感情に流されず、全体を俯瞰して数歩先の未来を予測し、勝率の高い作戦を組み立てる参謀。', icon: '🦉' },
+    { term: 'ビジョナリー', meaning: '【未来構想家】', desc: 'スケールの大きな夢や未来像（ビジョン）を描き、前向きな熱量で周囲に希望を与える人。', icon: '🦅' },
+    { term: 'ハーモナイザー', meaning: '【調和者】', desc: '場の空気や人間関係のハーモニー（調和）を守り、誰もが安心できる穏やかな居場所を作る人。', icon: '🦌' },
+    { term: 'オーガナイザー', meaning: '【組織整備士】', desc: '散らかったタスクや不透明な仕組みをオーガナイズ（綺麗に整理整頓）する実務家。', icon: '🦫' },
+    { term: 'パイオニア', meaning: '【開拓者】', desc: 'リスクを恐れず、誰も足を踏み入れていない前人未到の領域へ真っ先に進む先駆者。', icon: '🐆' },
+    { term: 'アナリスト', meaning: '【分析者】', desc: '事実やデータに基づいて冷静に物事の裏側や原因を分析（アナライズ）する知性派。', icon: '🦅' },
+    { term: 'プロモーター', meaning: '【発信推進者】', desc: 'アイデアや企画の魅力をプロモート（大々的に宣伝・発信）し、ムーブメントを作る人。', icon: '📣' },
+    { term: 'パーフェクショニスト', meaning: '【完璧追求者】', desc: '妥協を許さず、高い完成度とプロ意識でクオリティを極限まで高める職人。', icon: '🎯' },
+    { term: 'イノベーター', meaning: '【技術革新者】', desc: '従来の常識や枠組みを打破し、革新的なアイデアやイノベーションを起こす創発者。', icon: '🦄' },
+    { term: 'メディエーター', meaning: '【仲裁調停者】', desc: '対立する意見の真ん中に立ち、双方の納得いく着地点を導き出すバランス調整役。', icon: '🕊️' },
+    { term: 'クリエイター', meaning: '【創作者】', desc: '既成概念にとらわれない柔軟な発想と感性でワクワクする新しい価値を創り出す人。', icon: '🦊' },
+    { term: 'サポーター', meaning: '【支援者】', desc: '困っている人や悩んでいる人に寄り添い、足元を温かく支える献身的なパートナー。', icon: '🐬' },
+    { term: 'スペシャリスト', meaning: '【専門探求者】', desc: '流行に左右されず、自分の興味のあるテーマを深く追求して極める探求者。', icon: '🐆' },
+    { term: 'カウンセラー', meaning: '【相談役】', desc: '人の隠れた悩みや微細な感情に耳を傾け、深い包容力で受け止める心の専門家。', icon: '🦢' },
+    { term: '守護エレメント', meaning: '【占星術の4大属性】', desc: '西洋占星術の4大要素（火＝情熱、地＝現実安定、風＝客観知性、水＝情感共感）を指します。', icon: '🔮' },
+  ];
 
   // Trigger celebration confetti on mount
   useEffect(() => {
@@ -185,11 +204,11 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       </div>
 
-      {/* Tab Switcher (4 Tabs) */}
-      <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-2xl bg-slate-900/90 p-1.5 border border-slate-800 text-xs font-bold my-2 shadow-lg">
+      {/* Tab Switcher (5 Tabs) */}
+      <div className="w-full grid grid-cols-3 sm:grid-cols-5 gap-1 rounded-2xl bg-slate-900/90 p-1.5 border border-slate-800 text-[11px] sm:text-xs font-bold my-2 shadow-lg">
         <button
           onClick={() => { soundManager.playClick(); setActiveTab('detail'); }}
-          className={`py-2.5 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
+          className={`py-2 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
             activeTab === 'detail'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-400 hover:text-slate-200'
@@ -201,7 +220,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
         <button
           onClick={() => { soundManager.playClick(); setActiveTab('career'); }}
-          className={`py-2.5 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
+          className={`py-2 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
             activeTab === 'career'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-400 hover:text-slate-200'
@@ -213,32 +232,56 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
         <button
           onClick={() => { soundManager.playClick(); setActiveTab('affinity'); }}
-          className={`py-2.5 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
+          className={`py-2 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
             activeTab === 'affinity'
               ? 'bg-indigo-600 text-white shadow-md font-extrabold'
               : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          <span>詳細相性診断</span>
+          <span>詳細相性</span>
+        </button>
+
+        <button
+          onClick={() => { soundManager.playClick(); setActiveTab('glossary'); }}
+          className={`py-2 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
+            activeTab === 'glossary'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md font-extrabold'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <BookOpen className="w-3.5 h-3.5 text-amber-300" />
+          <span>用語解説</span>
         </button>
 
         <button
           onClick={() => { soundManager.playClick(); setActiveTab('aiprompt'); }}
-          className={`py-2.5 rounded-xl transition-all text-center flex items-center justify-center gap-1 ${
+          className={`py-2 rounded-xl transition-all text-center flex items-center justify-center gap-1 col-span-2 sm:col-span-1 ${
             activeTab === 'aiprompt'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>AIプロンプト</span>
+          <span>AI分析</span>
         </button>
       </div>
 
       {/* TAB 1: OVERVIEW & STRENGTHS */}
       {activeTab === 'detail' && (
         <div className="w-full space-y-4 animate-fade-in text-xs sm:text-sm my-2">
+          {/* Quick Glossary Guide Banner */}
+          <div
+            onClick={() => { soundManager.playClick(); setActiveTab('glossary'); }}
+            className="w-full glass-card rounded-2xl p-3 px-4 border border-purple-500/30 bg-purple-950/20 flex items-center justify-between text-xs text-purple-200 cursor-pointer hover:border-purple-400/60 transition-all shadow-md group"
+          >
+            <div className="flex items-center gap-2 font-medium">
+              <BookOpen className="w-4 h-4 text-amber-300 shrink-0 group-hover:scale-110 transition-transform" />
+              <span>カタカナ称号や用語の意味はこちら 【🔮 用語解説ガイド】</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-purple-300 group-hover:translate-x-1 transition-transform shrink-0" />
+          </div>
+
           {/* Overview */}
           <div className="glass-card rounded-2xl p-5 border border-white/10 space-y-2">
             <h3 className="font-bold text-indigo-300 flex items-center gap-2 text-sm border-b border-white/10 pb-2">
@@ -444,7 +487,45 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       )}
 
-      {/* TAB 4: SELF PROFILE AI PROMPT ("私について") */}
+      {/* TAB 4: GLOSSARY (占い＆カタカナ用語解説) */}
+      {activeTab === 'glossary' && (
+        <div className="w-full space-y-3 animate-fade-in text-xs sm:text-sm my-2">
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-purple-500/40 bg-purple-950/20 space-y-3 shadow-xl">
+            <div className="flex items-center justify-between border-b border-purple-500/30 pb-2">
+              <div className="flex items-center gap-2 text-purple-300 font-bold text-sm sm:text-base">
+                <BookOpen className="w-4 h-4 text-amber-300" />
+                <span>🔮 占い・カタカナ用語解説ガイド</span>
+              </div>
+              <span className="text-[10px] bg-indigo-950 text-indigo-300 font-mono px-2.5 py-0.5 rounded-full border border-indigo-500/40">
+                GLOSSARY
+              </span>
+            </div>
+
+            <p className="text-slate-300 leading-relaxed text-xs">
+              診断結果に出てくるカタカナのタイプ名や用語の和訳・日本語解説一覧です。用語の意味をチェックして理解を深めましょう。
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              {GLOSSARY_ITEMS.map((item, idx) => (
+                <div key={idx} className="p-3 bg-slate-950/80 rounded-xl border border-white/10 space-y-1 hover:border-indigo-400/50 transition-all">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white text-xs sm:text-sm flex items-center gap-1.5">
+                      <span>{item.icon}</span>
+                      <span>{item.term}</span>
+                    </span>
+                    <span className="text-[10px] text-amber-300 font-bold bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-500/30">
+                      {item.meaning}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed pt-0.5">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: SELF PROFILE AI PROMPT ("私について") */}
       {activeTab === 'aiprompt' && (
         <div className="w-full space-y-4 animate-fade-in text-xs sm:text-sm my-2">
           <div className="glass-card rounded-2xl p-5 border border-amber-500/30 bg-amber-950/20 space-y-3">

@@ -91,14 +91,36 @@ export const CharacterPortraitCard: React.FC<CharacterPortraitCardProps> = ({
         </div>
 
         {/* Trait Tags */}
-        <div className="flex items-center justify-center gap-2 pt-1 text-[10px] text-slate-300">
-          <span className="px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-700 flex items-center gap-1 font-mono font-bold">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1 text-[10px] text-slate-300">
+          <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-indigo-500/30 flex items-center gap-1 font-bold">
             <Shield className="w-3 h-3 text-indigo-400" />
-            <span>主軸特性: {personality.primaryTrait.toUpperCase()}</span>
+            <span>主軸: {
+              {
+                leader: 'リーダー (牽引者)',
+                analyst: 'アナリスト (分析者)',
+                creator: 'クリエイター (創作者)',
+                supporter: 'サポーター (支援者)',
+                realist: 'リアリスト (現実派)',
+                idealist: 'アイデアイスト (理想家)',
+                individual: 'インディビジュアル (独自派)',
+                harmonizer: 'ハーモナイザー (調和者)',
+              }[personality.primaryTrait] || personality.primaryTrait
+            }</span>
           </span>
-          <span className="px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-700 flex items-center gap-1 font-mono font-bold">
+          <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-amber-500/30 flex items-center gap-1 font-bold">
             <Zap className="w-3 h-3 text-amber-400" />
-            <span>補助特性: {personality.secondaryTrait.toUpperCase()}</span>
+            <span>補助: {
+              {
+                leader: 'リーダー (牽引者)',
+                analyst: 'アナリスト (分析者)',
+                creator: 'クリエイター (創作者)',
+                supporter: 'サポーター (支援者)',
+                realist: 'リアリスト (現実派)',
+                idealist: 'アイデアイスト (理想家)',
+                individual: 'インディビジュアル (独自派)',
+                harmonizer: 'ハーモナイザー (調和者)',
+              }[personality.secondaryTrait] || personality.secondaryTrait
+            }</span>
           </span>
         </div>
 
